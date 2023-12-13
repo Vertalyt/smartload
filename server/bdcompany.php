@@ -28,6 +28,7 @@ $username = 'sa';
 $password = '7!5sBU+H9umeD&5!';
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+
     try {
         $conn = new PDO("sqlsrv:Server=$server;Database=$database;Encrypt=false", $username, $password);
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

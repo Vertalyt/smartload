@@ -38,36 +38,6 @@
 
       <div>
         <label
-          for="email"
-          class="flex flex-col text-sm font-medium text-gray-700"
-          >Email</label
-        >
-
-        <div class="relative mt-1 rounded-md shadow-sm">
-          <div class="absolute inset-y-0 left-0 flex items-center pl-3">
-            <EmailSVG class="h-5 w-5" :class="{ 'text-red-400': eError }" />
-          </div>
-          <input
-            v-model="email"
-            @blur="eBlur"
-            type="email"
-            id="email"
-            name="email"
-            class="w-full rounded-md pl-10 pr-10 text-sm focus:border-green-500 focus:ring-green-500"
-            :class="{ 'border-red-300 text-red-900 placeholder:text-red-300 focus:border-red-500 focus:ring-red-500': eError }"
-            placeholder="john@example.com"
-          />
-          <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-            <ExclamationSVG v-if="eError" class="h-5 w-5 text-red-500" />
-          </div>
-        </div>
-        <p class="mt-2 text-sm text-red-600" v-if="eError">
-          {{ eError }}
-        </p>
-      </div>
-
-      <div>
-        <label
           for="password"
           class="flex flex-col text-sm font-medium text-gray-700"
           >Password</label
@@ -105,15 +75,19 @@
 
 <script setup>
 import UserFormSVG from "@/assets/img/svg/UserFormSVG.vue";
-import EmailSVG from "@/assets/img/svg/EmailSVG.vue";
 import PasswordSVG from "@/assets/img/svg/PasswordSVG.vue";
 import ExclamationSVG from "@/assets/img/svg/ExclamationSVG.vue";
 import SubmitButton from "@/components/SubmitButton.vue";
 import { useField, useForm } from "vee-validate";
 import * as yup from "yup";
+import { useModalStore } from "@/stores/authStore";
+import { computed } from 'vue'
+
 
 defineEmits({});
 defineProps({});
+
+const modalStore = computed(() => useModalStore());
 
 const PASSWORD_LENGHT = 6;
 
@@ -124,19 +98,6 @@ const {
   errorMessage: nError,
   handleBlur: nBlur,
 } = useField("name", yup.string().trim().required("Введите емаил"));
-
-const {
-  value: email,
-  errorMessage: eError,
-  handleBlur: eBlur,
-} = useField(
-  "email",
-  yup
-    .string()
-    .trim()
-    .required("Введите емаил")
-    .email("Необходимо ввести корректный емаил"),
-);
 
 const {
   value: password,
@@ -154,8 +115,16 @@ const {
     ),
 );
 
-const onSubmit = handleSubmit(async (values) => {
-  console.log("onSubmit", values);
+const onSubmit = handleSubmit(async (values, { resetForm }) => {
+  try {
+   const status = await modalStore.value.login(values)
+   if(status) {
+    resetForm();
+   }
+
+  } catch (error) {
+    /* empty */
+  }
 });
 </script>
 

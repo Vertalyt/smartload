@@ -1,9 +1,9 @@
 <script setup>
 import { useRoute } from 'vue-router'
-import { computed } from 'vue'
+import { computed,  onMounted, ref } from 'vue'
 import MainLayout from './layout/MainLayout.vue'
 import AuthLayout from './layout/AuthLayout.vue'
-
+// import { getAuth } from './api'
 const layout = {
   MainLayout,
   AuthLayout
@@ -12,13 +12,6 @@ const layout = {
 const route = useRoute()
 const metaLayout = computed(() => route.meta.layout)
 
-// import { onMounted, ref } from 'vue';
-// import { getAuth, getSQL } from './api'
-// const auth = ref()
-// onMounted(async ()=> {
-//   auth.value = await getSQL()
-//   console.log('auth', auth.value);
-// })
 </script>
 
 <template>

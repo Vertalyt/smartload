@@ -5,3 +5,5 @@ export const COLOR_VARIABLE_BTN =  {
       green: 'bg-green-600 hover:bg-green-700 focus:ring-green-500',
       white: 'bg-white hover:bg-gray-200 focus:ring-gray-200 font-extrabold',
     }
+
+    
