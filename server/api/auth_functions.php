@@ -2,6 +2,7 @@
 // auth_functions.php
 
 function authenticateUser($ad_user, $ad_password) {
+
     try {
         $ldap_conn = ldap_connect("ldap://10.100.10.1");
         ldap_set_option($ldap_conn, LDAP_OPT_PROTOCOL_VERSION, 3);

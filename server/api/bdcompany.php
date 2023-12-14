@@ -1,31 +1,14 @@
 <?php
 
+
 // Определение допустимых источников (origins)
-$allowed_origins = [
-    'http://localhost:5173',
-    // Add other allowed origins if needed
-];
+require_once('cors.php');
 
-// Проверка, является ли текущий источник допустимым
-$current_origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
+// Подключение конфигурации
+require_once('config.php');
 
-// Разрешаем только запросы с допустимых источников
-if (in_array($current_origin, $allowed_origins)) {
-    header('Access-Control-Allow-Origin: ' . $current_origin);
-    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-    header('Access-Control-Allow-Headers: Content-Type');
-    header('Access-Control-Allow-Credentials: true');
-}
 
-// Если это запрос OPTIONS, завершаем скрипт
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    exit;
-}
 
-$server = '10.100.6.2';
-$database = 'ContragentDataDB';
-$username = 'sa';
-$password = '7!5sBU+H9umeD&5!';
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
