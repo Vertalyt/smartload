@@ -5,7 +5,7 @@ use Firebase\JWT\JWT;
 
 function signUserToken($samaccountname, $mail) {
     // Путь к закрытому ключу для подписи токена
-    $privateKeyPath = $_SERVER['DOCUMENT_ROOT'] . '/api/patch/to/private_key.pem';
+    $privateKeyPath = $_SERVER['DOCUMENT_ROOT'] . '/api/key/patch/to/private_key.pem';
 
     // Проверяем, существует ли закрытый ключ
     if (!file_exists($privateKeyPath)) {

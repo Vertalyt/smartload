@@ -2,24 +2,45 @@
   <div class="flex w-full flex-col">
     <div>
       <h2>
-        <button
-          @click="isOpenCollapsible = !isOpenCollapsible"
-          type="button"
-          class="flex w-full items-center justify-center gap-3 rounded-t-xl border border-blue-400 bg-blue-200 p-4 hover:bg-blue-300 focus:ring-1 focus:ring-blue-200 rtl:text-right"
+        <div
+          class="flex w-full justify-between gap-3 rounded-t-xl border border-blue-400 bg-blue-200 p-4 hover:bg-blue-300 focus:ring-1 focus:ring-blue-200 rtl:text-right"
         >
-          <span class="text-xl font-bold text-gray-700">{{ isShow }}</span>
-        </button>
+          <button
+            @click="isOpenCollapsible = !isOpenCollapsible"
+            type="button"
+            class="flex grow items-center justify-center gap-3 rounded-xl border border-blue-400 bg-blue-200 p-4 hover:bg-blue-300 focus:ring-1 focus:ring-blue-200 rtl:text-right"
+          >
+            <span class="text-xl font-bold text-gray-700">{{ isShow }}</span>
+          </button>
+          <div 
+          v-if="isShow === 'Свернуть'"
+          class="hidden gap-3 md:flex">
+            <SubmitButton
+              nameBtn="Додати всі"
+              color="blue"
+              @submit="fullFilter = true"
+              class="mr-2"
+            />
+
+            <SubmitButton
+              nameBtn="Зняти всі"
+              color="red"
+              @submit="fullFilter = false"
+              class="mr-2"
+            />
+          </div>
+        </div>
       </h2>
 
       <div
-        class="flex flex-col animate__animated rounded-b-xl border border-t-0 border-blue-400 py-5 transition delay-500 ease-out"
+        class="animate__animated flex flex-col rounded-b-xl border border-t-0 border-blue-400 py-5 transition delay-500 ease-out"
         :class="{
           hidden: isOpenCollapsible,
           animate__fadeIn: !isOpenCollapsible,
           animate__fadeOut: isOpenCollapsible,
         }"
       >
-        <div class="flex flex-wrap align-center justify-center gap-5 mb-5">
+        <div class="align-center mb-5 flex flex-wrap justify-center gap-5">
           <FilterBTN
             v-for="(fil, idx) in nameFilterCol"
             :key="idx"
@@ -29,13 +50,16 @@
             @active="isActiveBtnFilter"
           />
         </div>
-            <div class="w-48 mx-auto">
-              <SubmitButton nameBtn="Отправить" @submit="onSubmit" class="w-full" color="green"/>
-            </div>
 
+        <div class="mx-auto w-48">
+          <SubmitButton
+            nameBtn="Отправить"
+            @submit="onSubmit"
+            class="w-full"
+            color="green"
+          />
+        </div>
       </div>
-
-
     </div>
   </div>
 </template>
@@ -46,17 +70,14 @@ import FilterBTN from "@/components/FilterBTN.vue";
 import { decrement } from "@/functions";
 import SubmitButton from "@/components/SubmitButton.vue";
 
-
 const props = defineProps({
-  fullFilter: {
-    required: true,
-    type: [Boolean, null],
-  },
   nameFilterCol: {
     required: true,
     type: Array,
   },
 });
+
+const fullFilter = ref(null);
 
 // выпадающий список
 const isOpenCollapsible = ref(false);
@@ -94,9 +115,7 @@ const findCount = (name) => {
   return countFilters.value.find((btn) => btn.nameFilter === name)?.count;
 };
 
-const fullСhoice = computed(() => props.fullFilter);
-
-watch(fullСhoice, (val) => {
+watch(fullFilter, (val) => {
   if (!val) {
     countFilters.value.length = 0;
     count.value = 0;
@@ -114,10 +133,9 @@ watch(fullСhoice, (val) => {
   }
 });
 
-
 const onSubmit = () => {
-  console.log('onSubmit');
-}
+  console.log("onSubmit");
+};
 </script>
 
 <script>

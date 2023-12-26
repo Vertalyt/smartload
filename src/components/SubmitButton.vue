@@ -1,6 +1,6 @@
 
 <template>
-      <button @click.stop ="emit('submit')"
+      <button @click ="emit('submit')"
         :class="classesBTN"
         >{{ nameBtn }}</button
       >
@@ -8,7 +8,7 @@
 
 
 <script setup>
-import { COLOR_VARIABLE_BTN } from '@/constans'
+import { COLOR_VARIABLE_BTN } from '@/constants'
 import { computed } from 'vue'
 
 
@@ -32,7 +32,7 @@ const props = defineProps({
 
 const isColor = computed( () => [COLOR_VARIABLE_BTN[props.color]] )
 
-const classesBTN = ['rounded-md px-4 py-2 font-semibold text-white shadow-lg transition duration-150 ease-in-out hover:shadow-xl focus:shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2', [...isColor.value]]
+const classesBTN = ['rounded-md px-4 py-2 font-semibold text-white shadow-lg transition duration-150 ease-in-out hover:shadow-xl focus:shadow-xl focus:outline-none', [...isColor.value]]
 
 
 </script>

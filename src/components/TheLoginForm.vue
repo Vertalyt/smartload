@@ -1,13 +1,13 @@
 <template>
   <div
-    class="z-10 mx-auto mt-10 w-full max-w-md rounded-xl bg-white/70 p-10 shadow-xl backdrop-blur-xl"
+    class="flex flex-col justify-center z-10 mx-auto mt-10 w-full max-w-md rounded-xl bg-white/70 p-10 shadow-xl backdrop-blur-xl"
   >
     <form action="#" class="space-y-6" @submit.prevent="onSubmit">
       <div>
         <label
           for="name"
           class="flex flex-col text-sm font-medium text-gray-700"
-          >Name</label
+          >Логін</label
         >
         <div class="relative mt-1 rounded-md shadow-sm">
           <div class="absolute inset-y-0 left-0 flex items-center pl-3">
@@ -40,7 +40,7 @@
         <label
           for="password"
           class="flex flex-col text-sm font-medium text-gray-700"
-          >Password</label
+          >Пароль</label
         >
 
         <div class="relative mt-1 rounded-md shadow-sm">
@@ -70,6 +70,7 @@
         <SubmitButton nameBtn="Submit" color="green" class="w-full" />
       </div>
     </form>
+    <TheLoader v-if="isLoading" class="mt-4"/>
   </div>
 </template>
 
@@ -80,24 +81,24 @@ import ExclamationSVG from "@/assets/img/svg/ExclamationSVG.vue";
 import SubmitButton from "@/components/SubmitButton.vue";
 import { useField, useForm } from "vee-validate";
 import * as yup from "yup";
-import { useModalStore } from "@/stores/authStore";
-import { computed } from 'vue'
+import { useAuthStore } from "@/stores/auth.js";
+import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import TheLoader from "@/components/TheLoader.vue";
 
+const authStore = computed(() => useAuthStore());
 
-defineEmits({});
-defineProps({});
-
-const modalStore = computed(() => useModalStore());
-
+const isLoading = ref(false)
 const PASSWORD_LENGHT = 6;
+const router = useRouter()
 
-const { isSubmitting, handleSubmit, submitCount } = useForm();
+const { handleSubmit} = useForm();
 
 const {
   value: name,
   errorMessage: nError,
   handleBlur: nBlur,
-} = useField("name", yup.string().trim().required("Введите емаил"));
+} = useField("name", yup.string().trim().required("Введіть email"));
 
 const {
   value: password,
@@ -108,23 +109,23 @@ const {
   yup
     .string()
     .trim()
-    .required("Введите пароль")
+    .required("Введіть пароль")
     .min(
       PASSWORD_LENGHT,
-      `Пароль не может быть меньше ${PASSWORD_LENGHT} символов`,
+      `Пароль не може бути меншим ніж за ${PASSWORD_LENGHT} символів`,
     ),
 );
 
 const onSubmit = handleSubmit(async (values, { resetForm }) => {
+  isLoading.value = true
   try {
-   const status = await modalStore.value.login(values)
+   const status = await authStore.value.login(values)
+   resetForm();
    if(status) {
-    resetForm();
+    isLoading.value = false
+    router.push('./')
    }
-
-  } catch (error) {
-    /* empty */
-  }
+  } catch (error) {/* empty */}
 });
 </script>
 
@@ -132,4 +133,4 @@ const onSubmit = handleSubmit(async (values, { resetForm }) => {
 export default {
   name: "TheLoginForm",
 };
-</script>
+</script>@/stores/auth@/stores@/stores/auth

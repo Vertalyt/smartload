@@ -11,7 +11,7 @@ require_once('auth_functions.php');
 require_once('errorhandler.php');
 
 // подпись токеном
-require_once('sign.php');
+require_once('../key/sign.php');
 
 // Регистрируем обработчик ошибок для ldap_bind
 set_error_handler('ldapErrorHandler', E_WARNING);
