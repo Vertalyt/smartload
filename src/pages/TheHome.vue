@@ -96,6 +96,7 @@ const isUpdateTable = async (edit) => {
       nameBD: namesBD.value,
       nameTableBD: namesTableBD.value,
       date: edit,
+      type: 'edit'
     });
     if(result) {
     // Обновление данных только при успешной отправке запроса
@@ -114,7 +115,6 @@ const isUpdateTable = async (edit) => {
     tableFocus();
   } catch (error) {
     console.error("Ошибка при обновлении данных:", error);
-    // Обработка ошибки, если необходимо
   }
 };
 

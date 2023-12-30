@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { requestDatabaseTables, requestTable, editTable } from "@/api";
+import { requestDatabaseTables, requestTable, editTable, delRecordTable } from "@/api";
 import { useMessage } from '@/stores/message'
 
 const storeMessage = useMessage()
@@ -42,9 +42,33 @@ export const useRequests = defineStore("requests", {
           }
         }
     },
-    async requestEditTable({ nameBD, nameTableBD, date }) {
+    async requestEditTable({ nameBD, nameTableBD, date, type }) {
+         
       try {
-        const result = await editTable({ nameBD, nameTableBD, date });
+        const result = await editTable({ nameBD, nameTableBD, date, type });
+
+        storeMessage.setMessage({
+          value: 'Успішно',
+          type: 'primary'
+        })
+        return result;
+      } catch (error) {
+        storeMessage.setMessage({
+          value: 'Помилка при відправці даних',
+          type: 'danger'
+        })
+        // Обработка ошибки
+        if(error.response.status === 401) {
+          return
+        } else {
+          console.error("Ошибка при отправке данных:", error);
+          throw error;
+        }
+      }
+    },
+    async requestDelRecordTable({ nameBD, nameTableBD, ID }) {
+      try {
+        const result = await delRecordTable({ nameBD, nameTableBD, ID });
         // Обработка результата, если необходимо
         storeMessage.setMessage({
           value: 'Успішно',

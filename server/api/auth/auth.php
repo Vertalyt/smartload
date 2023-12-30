@@ -13,6 +13,8 @@ require_once('errorhandler.php');
 // подпись токеном
 require_once('../key/sign.php');
 
+require_once('checking_adding_user.php');
+
 // Регистрируем обработчик ошибок для ldap_bind
 set_error_handler('ldapErrorHandler', E_WARNING);
 
@@ -33,16 +35,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $samaccountname = isset($entry[0]['samaccountname'][0]) ? $entry[0]['samaccountname'][0] : null;
             $mail = isset($entry[0]['mail'][0]) ? $entry[0]['mail'][0] : null;
 
+            $userInfo = getUserInfo($samaccountname);
 
+            if (!$userInfo) {
+                        // Пример использования модифицированной функции
+                    $userData = array(
+                    'username' => $samaccountname,
+                    'email' => $mail,
+                    'group_id' => 4,
+                    'active_status' => 0
+                    );
+
+                // Пользователь не найден в базе данных, создаем
+                $creationResult = createUser($userData);
+
+                if (!$creationResult) {
+                    // Ошибка при создании пользователя
+                    http_response_code(500);
+                    echo json_encode(["error" => "Ошибка при создании пользователя"], JSON_UNESCAPED_UNICODE);
+                    return;
+                }
+            }
+
+            // Подписываем токен пользователя
             $token = signUserToken($samaccountname, $mail);
-            
+
             $data = [
                 "user" => $samaccountname,
                 "email" => $mail,
                 "token" => $token,
             ];
             echo json_encode($data, JSON_UNESCAPED_UNICODE);
-            return $data;
+            return;
         } else {
             // Обработка неудачной аутентификации
             header('Content-Type: application/json');
@@ -62,3 +86,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Восстанавливаем стандартный обработчик ошибок
 restore_error_handler();
+?>

@@ -1,3 +1,5 @@
+import { statusUsers } from '@/constants'
+
 export function decrement({ arrayFilter, count }) {
   return arrayFilter.map((filter) => {
     if (filter.count >= count) {
@@ -102,4 +104,70 @@ export function sortSearch({search, arr}) {
     const lineAsString = JSON.stringify(line).toLowerCase();
     return lineAsString.includes(search.toLowerCase());
   });
+}
+
+
+
+export function editGroup ({
+  groupList, 
+  groupName, 
+  groups_permissions, 
+  allPermissions}) {
+
+  //ищу айди группы
+  const group_id = groupList.value.find((g) => g.group_name === groupName);
+  if (group_id && group_id.group_id) {
+    //нахожу все айди разрешений для этой группы
+    const permissionsOneGroup = groups_permissions.value.filter(
+      (g) => g.group_id === group_id.group_id,
+    );
+
+    //нахожу все разрешения для этой группы
+    return allPermissions.value.filter((p) => {
+      const coincidence = permissionsOneGroup.find(
+        (group_p) => group_p.permission_id === p.permission_id,
+      );
+      if (coincidence) {
+        return p;
+      }
+    });
+  } else {
+    return undefined
+  }
+};
+
+
+export function sortArr(arr) {
+  return arr.sort((a, b) => a.permission_id - b.permission_id);
+}
+
+
+
+export function formatMyDateString(dateString) {
+  const inputDate = new Date(dateString);
+  
+  const options = {
+    year: '2-digit',
+    month: 'numeric',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  };
+
+  const formatter = new Intl.DateTimeFormat('ua-UA', options);
+  return formatter.format(inputDate);
+}
+
+
+export function statusChange(change) {
+  return change === statusUsers[0] ? '1' : '0'
+}
+
+export function searchIdGroups(usersGroups, user_group_name) {
+  return usersGroups.find((g) => g.group_name === user_group_name)
+    .group_id;
+}
+
+export function searchNameGroups(usersGroups, user_group_id) {
+  return usersGroups.find((g) => g.group_id === user_group_id).group_name;
 }

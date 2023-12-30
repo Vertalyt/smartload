@@ -4,7 +4,7 @@
       <!-- меню -->
       <div class="flex w-full items-center justify-between p-6">
         <TheHeader />
-
+        <MobileMenu />
       <!-- контент -->
       <div
         class="absolute left-0 right-0 top-20 z-10 m-8 min-h-[85vh] min-w-[80vw] rounded-xl border border-gray-300 bg-gray-400/50 p-8 shadow-xl backdrop-blur-xl"
@@ -22,6 +22,7 @@
 <script setup>
 import TheWavesMainSVG from "@/assets/img/svg/TheWavesMainSVG.vue";
 import TheHeader from '@/components/TheHeader.vue'
+import MobileMenu from "@/components/MobileMenu.vue";
 
 </script>
 

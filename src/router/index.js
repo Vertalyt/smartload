@@ -32,7 +32,15 @@ const router = createRouter({
         auth: true,
       }
     },
-
+    {
+      path: '/users-permissions',
+      name: 'TheUsersPermissions',
+      component: () => import('../pages/TheUsersPermissions.vue'),
+      meta: {
+        layout: 'MainLayout',
+        auth: true,
+      }
+    },
 
     
   ],

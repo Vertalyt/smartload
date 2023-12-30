@@ -16,46 +16,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $postData = json_decode(file_get_contents('php://input'), true);
 
         // Проверка наличия необходимых ключей
-        if (isset($postData['nameBD'], $postData['nameTableBD'], $postData['date'])) {
+        if (isset($postData['nameBD'], $postData['nameTableBD'], $postData['ID'])) {
             $database = $postData['nameBD'];
             $tableName = $postData['nameTableBD'];
-            $date = $postData['date'];
+            $IDToDelete = $postData['ID'];
 
             // Валидация и санитизация пользовательского ввода при необходимости
 
             $conn = new PDO("sqlsrv:Server=$server;Database=$database;Encrypt=false", $username, $password);
             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-            // Получаем ID из данных
-            $IDLine = $date['ID']; // Предполагается, что 'ID' - это ключ в ваших данных
-
-            $sql = "UPDATE $tableName SET ";
-
-            // Подготавливаем массив для хранения ключей (имен столбцов)
-            $columns = array_keys($date);
-
-            // Создаем часть SQL-запроса для каждого столбца, исключая 'ID'
-            foreach ($columns as $column) {
-                if ($column != 'ID') {
-                    $sql .= "$column = :$column, ";
-                }
-            }
-
-            // Удаляем последнюю запятую и пробел
-            $sql = rtrim($sql, ', ');
-
-            $sql .= " WHERE ID = :ID";
-
+            // Подготовка и выполнение SQL-запроса на удаление записи
+            $sql = "DELETE FROM $tableName WHERE ID = :ID";
             $stmt = $conn->prepare($sql);
 
-            // Привязываем параметры для каждого столбца, исключая 'ID'
-            foreach ($columns as $column) {
-                if ($column != 'ID') {
-                    $stmt->bindValue(":$column", $date[$column]);
-                }
-            }
-
-            $stmt->bindValue(':ID', $IDLine, PDO::PARAM_INT); // Параметр INT для безопасности
+            // Привязываем параметры
+            $stmt->bindValue(':ID', $IDToDelete, PDO::PARAM_INT);
 
             $stmt->execute();
 
@@ -63,18 +39,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Content-Type: application/json');
 
             // Возвращаем подтверждение в формате JSON
-            echo json_encode(array("success" => "Запись успешно отредактирована"));
+            echo json_encode(array("success" => "Запись успешно удалена"));
         } else {
             // Если не хватает ключей в данных
             echo json_encode(array("error" => "Отсутствуют необходимые ключи в данных"));
         }
     } catch (PDOException $e) {
         // Логирование или обработка ошибок должным образом
-        http_response_code(500); // Устанавливаем статус ошибки 500 Internal Server Error
         echo json_encode(array("error" => "Ошибка подключения к базе данных: " . $e->getMessage()));
-
     } finally {
         $conn = null;
     }
 }
+
 ?>

@@ -9,6 +9,9 @@ require_once('../auth/config.php');
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
+    $logFilePath = 'C:\\Work\\error_log.txt';
+    error_log("Request: " . file_get_contents('php://input'), 3, $logFilePath);
+
     try {
         // Принимаем параметр database из запроса
         $database = $_GET['nameTableBD'];

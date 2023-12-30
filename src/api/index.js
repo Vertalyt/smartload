@@ -41,6 +41,8 @@ export async function isAuthStatus(token) {
 
 // запрос таблицы
 export async function requestTable({nameBD, nameTableBD}) {
+
+
   const url = `${import.meta.env.VITE_URL_BACK_SQL}?nameBD=${nameBD}&nameTableBD=${nameTableBD}`;
   try {
     const response = await instance.get(url);
@@ -59,6 +61,7 @@ export async function requestDatabaseTables(nameTableBD) {
   const url = import.meta.env.VITE_URL_TablesName;
   try {
     const response = await instance.get(url, { params: nameTableBD });
+    console.log(response);
     return response.data;
   } catch (error) {
     if(error?.response?.status === 401) {
@@ -70,8 +73,14 @@ export async function requestDatabaseTables(nameTableBD) {
 }
 
 // правка таблицы
-export async function editTable({ nameBD, nameTableBD, date }) {
-  const url = import.meta.env.VITE_URL_TablesEdit;
+export async function editTable({ nameBD, nameTableBD, date, type }) {
+
+  const urlVariable =  { 
+     edit : import.meta.env.VITE_URL_Edit_record,
+     add : import.meta.env.VITE_URL_Tables_ADD_Record,
+    };
+  const url = urlVariable[type]
+  
   try {
     const result = await instance.post(url, { nameBD, nameTableBD, date }, {
       headers: {
@@ -88,4 +97,23 @@ export async function editTable({ nameBD, nameTableBD, date }) {
   }
 }
 
+// удаление записи
+export async function delRecordTable({ nameBD, nameTableBD, ID }) {
+
+  const url = import.meta.env.VITE_URL_Tables_Del_Record
+  try {
+    const result = await instance.post(url, { nameBD, nameTableBD, ID }, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    return result;
+  } catch (error) {
+    if(error?.response?.status === 401) {
+      console.log('message', error.message);
+    } else {
+        throw error;
+    }
+  }
+}
 
