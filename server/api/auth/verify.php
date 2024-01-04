@@ -43,12 +43,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $userData = $decoded->data;
         
             // Извлекаем email и login (samaccountname)
-            $email = $userData->mail ?? null;
             $login = $userData->samaccountname ?? null;
         
             // Возвращаем модифицированные данные
             header('Content-Type: application/json');
-            echo json_encode(["success" => true, "data" => ["email" => $email, "login" => $login]], JSON_UNESCAPED_UNICODE);
+            echo json_encode(["success" => true, "data" => ["login" => $login]], JSON_UNESCAPED_UNICODE);
             // Здесь можно вернуть успешный ответ, если это необходимо
         
         } catch (Exception $e) {

@@ -62,7 +62,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $data = [
                 "user" => $samaccountname,
-                "email" => $mail,
                 "token" => $token,
             ];
             echo json_encode($data, JSON_UNESCAPED_UNICODE);

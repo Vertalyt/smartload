@@ -47,6 +47,11 @@ import TheTableLineEdit from "@/components/home/table/TheTableLineEdit.vue";
 import TheLabelHome from "@/components/home/TheLabelHome.vue";
 import { useRequests } from "@/stores/requests";
 
+
+const storeRequests = useRequests();
+
+
+
 // запускаю анимацию загрузки
 const isLoading = ref(false);
 const handleLoadingEvent = (newValue) => {
@@ -88,7 +93,7 @@ const editLineID = (ID) => {
   editLineDate.value = dataTable.value.filter((line) => line.ID === ID);
 };
 
-const storeRequests = useRequests();
+
 const isUpdateTable = async (edit) => {
   // отправить в SQL правку. после правлю текущие массивы
   try {

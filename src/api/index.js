@@ -56,12 +56,12 @@ export async function requestTable({nameBD, nameTableBD}) {
   }
 }
 
+
 // запрос названия таблиц в БД
 export async function requestDatabaseTables(nameTableBD) {
   const url = import.meta.env.VITE_URL_TablesName;
   try {
     const response = await instance.get(url, { params: nameTableBD });
-    console.log(response);
     return response.data;
   } catch (error) {
     if(error?.response?.status === 401) {
@@ -81,6 +81,7 @@ export async function editTable({ nameBD, nameTableBD, date, type }) {
     };
   const url = urlVariable[type]
   
+
   try {
     const result = await instance.post(url, { nameBD, nameTableBD, date }, {
       headers: {
@@ -117,3 +118,19 @@ export async function delRecordTable({ nameBD, nameTableBD, ID }) {
   }
 }
 
+
+// запрос таблицы c фильтром
+export async function requestTableInfo({nameBD, nameTableBD, filterColumn, filterValue}) {
+
+  const url = `${import.meta.env.VITE_URL_Tables_add_filter}?nameBD=${nameBD}&nameTableBD=${nameTableBD}&filterColumn=${filterColumn}&filterValue=${filterValue}`;
+  try {
+    const response = await instance.get(url);
+    return response.data;
+  } catch (error) {
+    if(error?.response?.status === 401) {
+      console.log('message', error.message);
+    } else {
+        throw error;
+    }
+  }
+}

@@ -8,8 +8,6 @@ export const COLOR_VARIABLE_BTN =  {
 
 export const TOKEN_KEY = "authToken";
 
-export const LISTS_BD_NAME_IN_LOAD = ['ContragentDataDB', 'PC_Base', 'Servers'];
-
 export const PAGINATE_COAST_VARIABLE = ['10', '15', '20', '50', '100'];
 
 export const USERS_BD = 'Users';
@@ -26,7 +24,8 @@ export const TABLES_USERS_BD = {
   permissions : 'permissions',
   groups : 'groups',
   g_permissions : 'group_permissions',
-  c_filter : 'column_filter'
+  c_filter : 'column_filter',
+  db_access : 'data_base_acces'
 }
 
 export const GROUPS_PARAM = {
@@ -49,6 +48,8 @@ export const USERS = {
   nameBD: USERS_BD,
   nameTableBD: TABLES_USERS_BD.info,
 };
+
+
 
 
 export const MENUDATE = [

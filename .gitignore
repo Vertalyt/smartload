@@ -17,12 +17,11 @@ coverage
 .env.development
 .env.production
 /server/api/auth/config.php
-/server/BD_file/
+/server/BD_file
 /cypress/videos/
 /cypress/screenshots/
-/server/api/key/public_key.pem
-/server/api/key/patch/to/
-/server/api/sert/
+/server/api/key
+/server/api/sert
 
 # Editor directories and files
 .vscode/*

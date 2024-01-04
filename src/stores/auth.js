@@ -3,19 +3,23 @@ import { getAuth, isAuthStatus } from "@/api";
 import { TOKEN_KEY } from '@/constants'
 import { useMessage } from "@/stores/message";
 
+
 export const useAuthStore = defineStore("auth", {
   state: () => ({
-    auth: false,
     token: localStorage.getItem(TOKEN_KEY) || null,
+    user: null,
+    id: null,
     email: null,
-    user: null
+    group_id: null,
+    BD_access: null,
+    table_access: null
   }),
   getters: {
-    getToken(state) {
-      return state.token;
-    },
     isAuthenticated(getters) {
       return !!getters.token;
+    },
+    getProperty: (state) => (param) => {
+      return state[param];
     },
   },
   actions: {
@@ -24,9 +28,7 @@ export const useAuthStore = defineStore("auth", {
         const data = await getAuth({ad_user:name, ad_password: password});
         if(data) {
             localStorage.setItem(TOKEN_KEY, data.token)
-            this.auth = true;
             this.token = data.token;
-            this.email = data.email;
             this.user = data.user;
             const storeMessage = useMessage()
             storeMessage.setMessage({
@@ -48,15 +50,12 @@ export const useAuthStore = defineStore("auth", {
       }
     },
     async authenticateUser() {
-
       const token = localStorage.getItem(TOKEN_KEY);
       if (token) {
         try {
           const verifyToken = await isAuthStatus(token);
           if (verifyToken && verifyToken.data) {
-            this.auth = true;
             this.token = token;
-            this.email = verifyToken.data.email;
             this.user = verifyToken.data.login;
             return verifyToken;
           }
@@ -77,14 +76,18 @@ export const useAuthStore = defineStore("auth", {
       this.handleAuthError()
     },
     handleAuthError() {
-      this.auth = false;
       this.token = null;
-      this.email = null;
       this.user = null;
       localStorage.removeItem(TOKEN_KEY);
+    },
+    userInfo({id, email,group_id, BD_access, table_access }) {
+      this.id = id;
+      this.email = email;
+      this.group_id = group_id;
+      this.BD_access = BD_access,
+      this.table_access = table_access
     }
     
+
   },
 });
-
-
