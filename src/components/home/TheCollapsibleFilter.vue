@@ -149,6 +149,7 @@ const fullFilter = ref(false);
 
 // наблюдаю за переменой выбора/снятия всех фильтров поиска
 
+
 watch(fullFilter, (val) => {
   if(val === null) {
     return
@@ -175,10 +176,10 @@ watch(fullFilter, (val) => {
 const onSubmit = () => {
   if(countFilters.value.length > 1) {
     const sortsArray = countFilters.value
-   const newSortsArray = sortsArray.find(line => line.nameFilter === 'ID')
+   const newSortsArray = sortsArray.find(line => line.nameFilter === 'id')
    if(!newSortsArray) {
     sortsArray.unshift({ 
-    "nameFilter": "ID",
+    "nameFilter": "id",
     "count": 0 })
    }
    emit("sorts", sortsArray)

@@ -26,17 +26,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $conn = new PDO("sqlsrv:Server=$server;Database=$database;Encrypt=false", $username, $password);
             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-            // Получаем ID из данных
-            $IDLine = $date['ID']; // Предполагается, что 'ID' - это ключ в ваших данных
+            // Получаем id из данных
+            $IDLine = $date['id']; // Предполагается, что 'id' - это ключ в ваших данных
 
             $sql = "UPDATE $tableName SET ";
 
             // Подготавливаем массив для хранения ключей (имен столбцов)
             $columns = array_keys($date);
 
-            // Создаем часть SQL-запроса для каждого столбца, исключая 'ID'
+            // Создаем часть SQL-запроса для каждого столбца, исключая 'id'
             foreach ($columns as $column) {
-                if ($column != 'ID') {
+                if ($column != 'id') {
                     $sql .= "$column = :$column, ";
                 }
             }
@@ -44,18 +44,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Удаляем последнюю запятую и пробел
             $sql = rtrim($sql, ', ');
 
-            $sql .= " WHERE ID = :ID";
+            $sql .= " WHERE id = :id";
 
             $stmt = $conn->prepare($sql);
 
-            // Привязываем параметры для каждого столбца, исключая 'ID'
+            // Привязываем параметры для каждого столбца, исключая 'id'
             foreach ($columns as $column) {
-                if ($column != 'ID') {
+                if ($column != 'id') {
                     $stmt->bindValue(":$column", $date[$column]);
                 }
             }
 
-            $stmt->bindValue(':ID', $IDLine, PDO::PARAM_INT); // Параметр INT для безопасности
+            $stmt->bindValue(':id', $IDLine, PDO::PARAM_INT); // Параметр INT для безопасности
 
             $stmt->execute();
 

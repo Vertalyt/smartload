@@ -59,9 +59,9 @@ export async function requestTable({nameBD, nameTableBD}) {
 
 // запрос названия таблиц в БД
 export async function requestDatabaseTables(nameTableBD) {
-  const url = import.meta.env.VITE_URL_TablesName;
+  const url = `${import.meta.env.VITE_URL_TablesName}?nameTableBD=${nameTableBD}`;
   try {
-    const response = await instance.get(url, { params: nameTableBD });
+    const response = await instance.get(url);
     return response.data;
   } catch (error) {
     if(error?.response?.status === 401) {
@@ -99,11 +99,11 @@ export async function editTable({ nameBD, nameTableBD, date, type }) {
 }
 
 // удаление записи
-export async function delRecordTable({ nameBD, nameTableBD, ID }) {
+export async function delRecordTable({ nameBD, nameTableBD, IDs }) {
 
   const url = import.meta.env.VITE_URL_Tables_Del_Record
   try {
-    const result = await instance.post(url, { nameBD, nameTableBD, ID }, {
+    const result = await instance.post(url, { nameBD, nameTableBD, IDs }, {
       headers: {
         'Content-Type': 'application/json'
       }
@@ -134,3 +134,36 @@ export async function requestTableInfo({nameBD, nameTableBD, filterColumn, filte
     }
   }
 }
+
+
+// запрос столбцов таблицы
+export async function requestColsTableInfo({nameBD, nameTableBD}) {
+
+  const url = `${import.meta.env.VITE_URL_Cols_Table}?nameBD=${nameBD}&nameTableBD=${nameTableBD}`;
+  try {
+    const response = await instance.get(url);
+    return response.data;
+  } catch (error) {
+    if(error?.response?.status === 401) {
+      console.log('message', error.message);
+    } else {
+        throw error;
+    }
+  }
+}
+
+// запрос таблицы по конкретным столбцам
+export async function requestColsTableFilterInfo({nameBD, nameTableBD, columns}) {
+  const url = `${import.meta.env.VITE_URL_TablesFilterCols}?nameBD=${nameBD}&nameTableBD=${nameTableBD}&${columns.map(column => `columns[]=${column}`).join('&')}`;
+  try {
+    const response = await instance.get(url);
+    return response.data;
+  } catch (error) {
+    if(error?.response?.status === 401) {
+      console.log('message', error.message);
+    } else {
+        throw error;
+    }
+  }
+}
+

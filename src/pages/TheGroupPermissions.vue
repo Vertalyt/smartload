@@ -91,7 +91,7 @@ function foundIdRecord(group, linePermission) {
         (g) =>
           g.group_id === group.group_id &&
           g.permission_id === linePermission.permission_id,
-      )?.ID;
+      )?.id;
 }
 
 
@@ -113,7 +113,7 @@ const editGroupPermission = async (val) => {
         await requests.requestEditTable({
             nameBD: USERS_BD,
             nameTableBD: GROUP_PERMISSIONS_PARAM.nameTableBD,
-            date: add,
+            date: [add],
             type : 'add'
           })
 
@@ -130,7 +130,7 @@ const editGroupPermission = async (val) => {
           await requests.requestDelRecordTable({
             nameBD: USERS_BD,
             nameTableBD: GROUP_PERMISSIONS_PARAM.nameTableBD,
-            ID: linePermissionsDel,
+            IDs: [linePermissionsDel],
           });
           ollPermissionsOneGroup.value = ollPermissionsOneGroup.value.filter(
         (item) => item.permission_name_ukr !== val.value );

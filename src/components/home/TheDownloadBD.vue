@@ -56,12 +56,14 @@ const addBD = async (val) => {
 
 }
 
+const cols_access = computed( () => authStore.getProperty('cols_access')) 
 const adTable = async (val) => {
   emit('loading', true)
   choiceTable.value = val
 
-
-  const tablesData = await requests.requestTableData({ nameBD: choiceBD.value, nameTableBD: val});
+  const sortColsAccess = cols_access.value.filter(c => c.bd_name === choiceBD.value && c.table_name === val).map(c => c.cols_name)
+  sortColsAccess.unshift('id')
+  const tablesData = await requests.requestTableFilterCols({ nameBD: choiceBD.value, nameTableBD: val, columns: sortColsAccess});
     if(tablesData) {
     emit('tableData', {tablesData, nameBD: choiceBD.value, nameTableBD: val})
     }

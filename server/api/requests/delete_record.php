@@ -16,22 +16,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $postData = json_decode(file_get_contents('php://input'), true);
 
         // Проверка наличия необходимых ключей
-        if (isset($postData['nameBD'], $postData['nameTableBD'], $postData['ID'])) {
+        if (isset($postData['nameBD'], $postData['nameTableBD'], $postData['IDs'])) {
             $database = $postData['nameBD'];
             $tableName = $postData['nameTableBD'];
-            $IDToDelete = $postData['ID'];
+            $IDsToDelete = $postData['IDs'];
 
             // Валидация и санитизация пользовательского ввода при необходимости
 
             $conn = new PDO("sqlsrv:Server=$server;Database=$database;Encrypt=false", $username, $password);
             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-            // Подготовка и выполнение SQL-запроса на удаление записи
-            $sql = "DELETE FROM $tableName WHERE ID = :ID";
+            // Подготовка и выполнение SQL-запроса на удаление записей
+            $placeholders = implode(',', array_fill(0, count($IDsToDelete), '?'));
+            $sql = "DELETE FROM $tableName WHERE id IN ($placeholders)";
             $stmt = $conn->prepare($sql);
 
             // Привязываем параметры
-            $stmt->bindValue(':ID', $IDToDelete, PDO::PARAM_INT);
+            foreach ($IDsToDelete as $index => $id) {
+                $stmt->bindValue(($index + 1), $id, PDO::PARAM_INT);
+            }
 
             $stmt->execute();
 
@@ -39,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Content-Type: application/json');
 
             // Возвращаем подтверждение в формате JSON
-            echo json_encode(array("success" => "Запись успешно удалена"));
+            echo json_encode(array("success" => "Записи успешно удалены"));
         } else {
             // Если не хватает ключей в данных
             echo json_encode(array("error" => "Отсутствуют необходимые ключи в данных"));

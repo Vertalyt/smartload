@@ -28,9 +28,12 @@ const authStore = useAuthStore();
 const storeRequests = useRequests();
 onMounted(async () => {
   const user = authStore.getProperty('user');
-  await storeRequests.requestUserDataFilter({
+  if(user) {
+    await storeRequests.requestUserDataFilter({
     filterValue: user,
   });
+  }
+
 });
 </script>
 

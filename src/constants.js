@@ -25,7 +25,8 @@ export const TABLES_USERS_BD = {
   groups : 'groups',
   g_permissions : 'group_permissions',
   c_filter : 'column_filter',
-  db_access : 'data_base_acces'
+  db_access : 'data_base_acces',
+  c_access: 'cols_access'
 }
 
 export const GROUPS_PARAM = {

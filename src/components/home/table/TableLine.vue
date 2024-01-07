@@ -10,7 +10,7 @@
 
 
       <button
-        v-if="thead && col === 'ID'"
+        v-if="thead && col === 'id'"
         class="rounded-full focus-visible:none"
         aria-label="one"
         id="sendRef"
@@ -19,9 +19,9 @@
 
 
       <button
-        v-if="!thead && key !== 'ID'"
+        v-if="!thead && key !== 'id'"
         class="rounded-full bg-gray-500 p-1 hover:bg-gray-400"
-        @click="onSubmit(line.ID)"
+        @click="onSubmit(line.id)"
       >
       <PensilSVG  class="w-5 h-5 text-gray-800"/>
     </button>
@@ -51,11 +51,11 @@ defineProps({
 
 
 const isId = (col) => {
-  return col === "ID" ? "max-w-[10px]" : "min-w-[20ch]";
+  return col === "id" ? "max-w-[10px]" : "min-w-[20ch]";
 };
 
-const onSubmit = (ID) => {
-  emit("edit", ID);
+const onSubmit = (id) => {
+  emit("edit", id);
 };
 </script>
 

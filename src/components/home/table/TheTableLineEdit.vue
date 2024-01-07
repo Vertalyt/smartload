@@ -59,7 +59,7 @@ const props = defineProps({
 
 const fullDate = ref(props.date[0]);
 
-const isID = (key) => (key === "ID" ? true : false);
+const isID = (key) => (key === "id" ? true : false);
 
 const onSubmit = () => {
   emit('update', fullDate.value)

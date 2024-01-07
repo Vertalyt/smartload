@@ -55,6 +55,7 @@ const storeRequests = useRequests();
 // запускаю анимацию загрузки
 const isLoading = ref(false);
 const handleLoadingEvent = (newValue) => {
+
   isLoading.value = newValue;
 };
 
@@ -64,14 +65,16 @@ const sortsDataTable = ref();
 
 const namesBD = ref();
 const namesTableBD = ref();
+
 const tableData = ({ tablesData, nameBD, nameTableBD }) => {
+
   namesBD.value = nameBD;
   namesTableBD.value = nameTableBD;
 
   generationLineFilters.value.length = 0;
   updateCollapsible.value++;
 
-  // получаю имена столбцов без столбца ID
+  // получаю имена столбцов без столбца id
   generationLineFilters.value = colName(tablesData);
 
   // отправляю в компонент фильтров список
@@ -83,14 +86,16 @@ const updateCollapsible = ref(1);
 
 // сортирую по данным из фильтра
 const sortsTable = (sort) => {
+  isLoading.value = true;
   sortsDataTable.value = null;
   sortsDataTable.value = sortAndFilter({ sort, dataTable: dataTable.value });
+  isLoading.value = false;
 };
 
 const editLineDate = ref();
 
-const editLineID = (ID) => {
-  editLineDate.value = dataTable.value.filter((line) => line.ID === ID);
+const editLineID = (id) => {
+  editLineDate.value = dataTable.value.filter((line) => line.id === id);
 };
 
 

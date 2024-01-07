@@ -125,7 +125,9 @@ const onSubmit = handleSubmit(async (values, { resetForm }) => {
     isLoading.value = false
     router.push('./')
    }
-  } catch (error) {/* empty */}
+  } catch (error) {
+    isLoading.value = false
+  }
 });
 </script>
 
@@ -133,4 +135,4 @@ const onSubmit = handleSubmit(async (values, { resetForm }) => {
 export default {
   name: "TheLoginForm",
 };
-</script>@/stores/auth@/stores@/stores/auth
+</script>

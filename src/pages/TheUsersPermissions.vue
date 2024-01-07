@@ -3,13 +3,13 @@
     <TheLoader v-if="isLoading" />
   </div>
 
-  <ModalWrapper v-if="accessEditModal" @close="accessEditModal = false">
+  <ModalWrapper 
+  class="width"
+  v-if="accessEditModal" @close="accessEditModal = false">
     <EditAccessUser
-      v-if="users_access && bd_lists"
-      :users_access="users_access"
+      v-if="userId"
       :id="userId"
-      :bd_lists="bd_lists"
-      @bd="editAccessBD"
+      @edit="editAccess"
     />
   </ModalWrapper>
 
@@ -27,14 +27,15 @@
     :groupsVariable="groupsVariable"
     @edit="isEdit"
     @del="delUser"
-    @tables="loadPermissionsBdTables"
+    @tables="tablesId"
   />
 </template>
 
 <script setup>
 import { onMounted, ref } from "vue";
 import { useRequests } from "@/stores/requests";
-import { USERS, GROUPS_PARAM, TABLES_USERS_BD} from "@/constants";
+import { useAuthStore } from "@/stores/auth";
+import { USERS, GROUPS_PARAM } from "@/constants";
 import TheLoader from "@/components/TheLoader.vue";
 import TheUsersInfo from "@/components/users/TheUsersInfo.vue";
 import TheAddUser from "@/components/users/TheAddUser.vue";
@@ -48,6 +49,7 @@ const usersParam = ref();
 const usersGroups = ref();
 const groupsVariable = ref();
 
+ 
 onMounted(async () => {
   isLoading.value = true;
 
@@ -67,6 +69,7 @@ const isEdit = (val) => {
     date: val,
     type: "edit",
   });
+  refreshDate(val.id)
 };
 
 const addUser = async (val) => {
@@ -84,53 +87,66 @@ const delUser = async (id) => {
   requests.requestDelRecordTable({
     nameBD: USERS.nameBD,
     nameTableBD: USERS.nameTableBD,
-    ID: id,
+    IDs: [id],
   });
   // запрашиваю список пользователей заново, так как я не знаю айди который выдаст БД
-  usersParam.value = usersParam.value.filter((user) => user.ID !== id);
+  usersParam.value = usersParam.value.filter((user) => user.id !== id);
 };
 
-const users_access = ref();
+
+const userId = ref()
 const accessEditModal = ref(false);
-const userId = ref();
-const bd_lists = ref();
 
-const loadPermissionsBdTables = async (id) => {
-  accessEditModal.value = false;
-  userId.value = id;
-  users_access.value = await requests.requestUserData(id);
-  bd_lists.value = await requests.requestTableData({
-    nameBD: "BD_lists",
-    nameTableBD: "BD_lists",
-  });
-  accessEditModal.value = true;
-};
+const tablesId = (val) => {
+  userId.value = val;
+  accessEditModal.value = true
+}
 
 
-const editAccessBD = async (val) => {
-  
+
+
+const storeAuth = useAuthStore();
+
+async function refreshDate(saveID) {
+  const idUser = storeAuth.getProperty("id");
+  if (String(idUser) === String(saveID)) {
+    const user = storeAuth.getProperty("user");
+    await requests.requestUserDataFilter({
+      filterValue: user,
+    });
+  }
+}
+
+const editAccess = async (val) => {
   try {
     if (val.type === "add") {
-    await requests.requestEditTable({
-        nameBD: USERS.nameBD, 
-        nameTableBD: TABLES_USERS_BD.db_access, 
-        date: val.value[0], 
-        type: 'add'
-      })
+      await requests.requestEditTable({
+        nameBD: USERS.nameBD,
+        nameTableBD: val.base,
+        date: val.value,
+        type: "add",
+      });
     }
 
     if (val.type === "del") {
+      const IDs = val.value.map(r => r.id)
       await requests.requestDelRecordTable({
-        nameBD: USERS.nameBD, 
-        nameTableBD: TABLES_USERS_BD.db_access, 
-        ID: val.value[0].id, 
-      })
+        nameBD: USERS.nameBD,
+        nameTableBD: val.base,
+        IDs,
+      });
     }
-  accessEditModal.value = false;
+    if(val.load) {
+    accessEditModal.value = false;
+    }
+
+
+    // если ето свой пользователь, обновляю данные в сторе
+    await refreshDate(val.value[0].user_id);
+
   } catch (error) {
     /* empty */
   }
-
 };
 </script>
 
@@ -139,3 +155,10 @@ export default {
   name: "TheUsersPermissions",
 };
 </script>
+
+
+<style>
+.width {
+  width: auto;
+}
+</style>

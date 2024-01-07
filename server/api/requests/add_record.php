@@ -27,25 +27,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $conn = new PDO("sqlsrv:Server=$server;Database=$database;Encrypt=false", $username, $password);
             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         
-            // Подготовка и выполнение SQL-запроса на вставку новой записи
-            $columns = array_keys($postData['date']);
-            $values = array_values($postData['date']);
+            // Подготовка и выполнение SQL-запроса на вставку новых записей
+            $columns = array_keys($postData['date'][0]); // Assuming all subarrays have the same keys
+            $valuesPlaceholder = array_fill(0, count($columns), "?");
         
-            $sql = "INSERT INTO $tableName (" . implode(", ", $columns) . ") VALUES (" . implode(", ", array_fill(0, count($columns), "?")) . ")";
+            $sql = "INSERT INTO $tableName (" . implode(", ", $columns) . ") VALUES (" . implode(", ", $valuesPlaceholder) . ")";
             $stmt = $conn->prepare($sql);
         
-            // Привязываем параметры
-            foreach ($values as $index => $value) {
-                $stmt->bindValue(($index + 1), $value);
+            // Проходим по каждой записи в массиве и вставляем ее
+            foreach ($postData['date'] as $data) {
+                $values = array_values($data);
+
+                // Привязываем параметры
+                foreach ($values as $index => $value) {
+                    $stmt->bindValue(($index + 1), $value);
+                }
+
+                $stmt->execute();
             }
-        
-            $stmt->execute();
         
             // Установка соответствующих заголовков
             header('Content-Type: application/json');
         
             // Возвращаем подтверждение в формате JSON
-            echo json_encode(array("success" => "Запись успешно добавлена"));
+            echo json_encode(array("success" => "Записи успешно добавлены"));
         } else {
             // Если не хватает ключей в данных
             http_response_code(400); // Bad Request
@@ -67,3 +72,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $conn = null;
     }
 }
+?>

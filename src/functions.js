@@ -46,11 +46,11 @@ function sortAfterFiltering(sort, filteredData) {
 export function colName(val) {
   // получаю имена колонок
   const nameCol = Object.keys(val[0]);
-  // Найти индекс элемента "ID"
-  const indexOfID = nameCol.indexOf("ID");
-  // Проверить, найден ли элемент "ID"
+  // Найти индекс элемента "id"
+  const indexOfID = nameCol.indexOf("id");
+  // Проверить, найден ли элемент "id"
   if (indexOfID !== -1) {
-    // Удалить элемент "ID" с использованием splice
+    // Удалить элемент "id" с использованием splice
     nameCol.splice(indexOfID, 1);
   }
   return nameCol
@@ -72,9 +72,9 @@ export function computeTextHeight(content, key) {
 };
 
 
-// Функция для поиска индекса строки в массиве по ID
+// Функция для поиска индекса строки в массиве по id
 function findDataIndex (arrUpdate, editArr) {
-  return arrUpdate.findIndex(line => Number(line.ID) === Number(editArr.ID));
+  return arrUpdate.findIndex(line => Number(line.id) === Number(editArr.id));
 };
 
 // Функция для обновления данных в массиве по индексу
