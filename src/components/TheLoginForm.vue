@@ -118,16 +118,12 @@ const {
 
 const onSubmit = handleSubmit(async (values, { resetForm }) => {
   isLoading.value = true
-  try {
    const status = await authStore.value.login(values)
    resetForm();
    if(status) {
-    isLoading.value = false
     router.push('./')
    }
-  } catch (error) {
-    isLoading.value = false
-  }
+   isLoading.value = false
 });
 </script>
 

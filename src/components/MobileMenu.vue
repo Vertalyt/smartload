@@ -25,7 +25,7 @@
             nameBtn="Вихід"
             color="red"
             @submit="isLogaut"
-            class="mr-2 hidden sm:flex"
+            class="mr-2"
           />
         </div>
       </div>

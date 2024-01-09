@@ -1,4 +1,3 @@
-// import { useRouter } from 'vue-router'
 import axios from 'axios';
 import instance from '@/api/interceptors' 
 
@@ -11,12 +10,8 @@ export async function getAuth(params) {
     return response.data;
   } 
   catch (error) {
-    if(error?.response?.status === 401) {
-      console.log('message', error.message);
-    } else {
-        throw error;
-    }
-  }
+    throw error.response
+}
 }
 
 // проверка авторизации, не просрочен ли токен
@@ -72,7 +67,7 @@ export async function requestDatabaseTables(nameTableBD) {
   }
 }
 
-// правка таблицы
+// правка таблицы date должен быть массивом при добавлении записей
 export async function editTable({ nameBD, nameTableBD, date, type }) {
 
   const urlVariable =  { 
@@ -80,7 +75,6 @@ export async function editTable({ nameBD, nameTableBD, date, type }) {
      add : import.meta.env.VITE_URL_Tables_ADD_Record,
     };
   const url = urlVariable[type]
-  
 
   try {
     const result = await instance.post(url, { nameBD, nameTableBD, date }, {
@@ -167,3 +161,24 @@ export async function requestColsTableFilterInfo({nameBD, nameTableBD, columns})
   }
 }
 
+// добавление колонки
+export async function addColumnTable({ nameBD, nameTableBD, columnName, columnType }) {
+
+  const url = import.meta.env.VITE_URL_Tables_Add_Col
+
+  console.log(url, nameBD, nameTableBD, columnName, columnType);
+  try {
+    const result = await instance.post(url, { nameBD, nameTableBD, columnName, columnType }, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    return result;
+  } catch (error) {
+    if(error?.response?.status === 401) {
+      console.log('message', error.message);
+    } else {
+        throw error;
+    }
+  }
+}

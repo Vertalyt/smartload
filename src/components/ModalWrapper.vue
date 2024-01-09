@@ -1,7 +1,8 @@
 
 <template>
-  <div class="modalWrapper w-lvw h-screen z-40 bg-stone-600/90 p-5"
+  <div class="modalWrapper min-w-fit min-h-screen h-max z-30 bg-stone-600/90 p-5"
     @click.stop="isClose"
+    @keyup.esc="isClose"
   >
     <div>
       <slot />
@@ -36,5 +37,6 @@ export default {
   position: sticky;
   right: 0;
   top: 0;
+  height: max-content;
 }
 </style>

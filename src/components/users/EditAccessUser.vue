@@ -7,6 +7,7 @@
   >
 
     <BdCheck 
+    class="z-40 border-2 border-gray-400 rounded-md p-2 mx-2 my-0.5"
     v-if="bd_access && bd_lists"
     :bd_access="bd_access"
     :bd_lists="bd_lists"
@@ -15,6 +16,7 @@
 
 
     <TableCheck 
+    class="z-40 border-2 border-gray-400 rounded-md p-2 mx-2 my-0.5"
     v-if="bd_access && table_access"
     :bd_access="bd_access"
     :table_access="table_access"
@@ -25,6 +27,7 @@
 
 
     <ColsCheck
+    class="z-40 border-2 border-gray-400 rounded-md p-2 mx-2 my-0.5"
     v-if="bd_access && table_access"
     :bd_access="bd_access"
     :table_access="table_access"

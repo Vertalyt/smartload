@@ -9,7 +9,10 @@
         <ListPermission :permissions="permissions" />
 
 
-      <div class="flex flex-col gap-3 grow-1">
+
+      <div 
+      v-if="group !== 'root'"
+      class="flex flex-col gap-3 grow-1">
       
         <EditGroupPermissions 
         v-if="selectedAddPermissionsName.length > 0"
@@ -56,6 +59,10 @@ const props = defineProps({
     required: true,
     type: Array,
   }, 
+  group: {
+    required: true,
+    type: String,
+  }, 
 });
 
 
@@ -63,7 +70,6 @@ const selectedAddPermissionsName = ref([])
 const selectedDelPermissionsName = ref([])
 
 // ищу и убираю с списка уже доступные права и selectedDelPermissionsName 
-// и selectedAddPermissionsName уже те что есть
 const computedPermissions = computed(() => props.permissions )
 
 watch(computedPermissions, val => {

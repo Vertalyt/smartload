@@ -4,6 +4,7 @@ export const COLOR_VARIABLE_BTN =  {
       red: 'bg-red-500 hover:bg-red-700 focus:ring-red-600',
       green: 'bg-green-600 hover:bg-green-700 focus:ring-green-500',
       white: 'bg-white hover:bg-gray-200 focus:ring-gray-200 font-extrabold',
+      gray: 'bg-gray-500 hover:bg-gray-600 focus:ring-gray-600 font-extrabold',
     }
 
 export const TOKEN_KEY = "authToken";
@@ -16,6 +17,7 @@ export const ADD = 'Додати';
 
 export const REMOVE = 'Вилучити'
 
+export const EDIT = 'Редагувати'
 
 export const TABLES_USERS_BD = {
   info : 'user_info',

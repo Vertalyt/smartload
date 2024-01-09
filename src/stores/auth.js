@@ -40,16 +40,23 @@ export const useAuthStore = defineStore("auth", {
         } else {
           return false
         }
-      } catch (e) {
-        const storeMessage = useMessage()
-        console.log(e);
-        storeMessage.setMessage({
-          value: e,
-          type: 'warning'
-      })
-        throw new Error(e);
-      }
-    },
+      } catch (error) {
+        if(error.status === 401) {
+          const storeMessage = useMessage()
+          storeMessage.setMessage({
+            value: 'Не вірні логін чи пароль.',
+            type: 'warning'
+          })
+        } else {
+          const storeMessage = useMessage()
+          storeMessage.setMessage({
+            value: error,
+            type: 'warning'
+        })
+            throw error;
+        }
+    }
+  },
     async authenticateUser() {
       const token = localStorage.getItem(TOKEN_KEY);
       if (token) {

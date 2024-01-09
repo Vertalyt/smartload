@@ -3,7 +3,7 @@
   <div class="m-4 flex flex-col items-center justify-center gap-3">
     <h2 class="w-max text-lg font-bold">Доступні колонки:</h2>
 
-    <div class="flex">
+    <div class="flex flex-col gap-3 sm:flex-row">
       <RecordsPerPageSelector
       v-if="nameBD"
       :model-value="choiceBD"

@@ -31,7 +31,7 @@
           </div>
         </div>
       </h2>
-      <span class="flex items-center justify-center m-2 font-medium text-gray-600">Оберіть необхідні колонки таблиці.</span>
+      <span v-if="countFilters.length === 0" class="flex items-center justify-center m-2 font-medium text-gray-600">Оберіть необхідні колонки таблиці.</span>
       <div
         class="animate__animated flex flex-col rounded-b-xl border border-t-0 border-blue-400 py-5 transition delay-500 ease-out"
         :class="{

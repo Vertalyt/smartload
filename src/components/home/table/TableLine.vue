@@ -2,29 +2,33 @@
   <th
     v-for="(col, key, index) in line"
     :key="col + index + key"
-    class="py-3 border border-gray-500 max-w-48"
+    class="py-3 border border-gray-500 max-w-48 relative"
     :class="isId(key)"
   >
     <div class="flex items-center justify-between gap-2">
-      <span class="px-3">{{ col }}</span> 
-
-
       <button
         v-if="thead && col === 'id'"
-        class="rounded-full focus-visible:none"
+        class="focus-visible:none w-[1px]"
         aria-label="one"
         id="sendRef"
       >
-    </button>
+      </button>
 
 
-      <button
-        v-if="!thead && key !== 'id'"
-        class="rounded-full bg-gray-500 p-1 hover:bg-gray-400"
-        @click="onSubmit(line.id)"
-      >
-      <PensilSVG  class="w-5 h-5 text-gray-800"/>
-    </button>
+      <EditButtonBlock 
+        :nameLine="key"
+        :thead="thead"
+        :lineId="line.id"
+        :isTurnEl="isTurnEl"
+        @edit="$emit('edit', $event)"
+        @del="$emit('del', $event)"
+        />
+
+
+      <span class="px-3 text-center">{{ col }}</span> 
+
+     
+
 
     </div>
   </th>
@@ -33,10 +37,11 @@
 </template>
 
 <script setup>
-import PensilSVG from '@/assets/img/svg/PensilSVG.vue';
+import EditButtonBlock from '@/components/home/table/EditButtonBlock.vue'
 
-const emit = defineEmits({
-  edit: Number,
+defineEmits({
+  edit: String,
+  del: String
 });
 defineProps({
   thead: {
@@ -45,18 +50,19 @@ defineProps({
   },
   line: {
     required: true,
-    type: [Array, Object],
+    type: Object,
+  },
+  isTurnEl: {
+    required: false,
+    type: String,
   },
 });
 
 
 const isId = (col) => {
-  return col === "id" ? "max-w-[10px]" : "min-w-[20ch]";
+  return col === "id" ? "w-[80px]" : "min-w-[20ch]";
 };
 
-const onSubmit = (id) => {
-  emit("edit", id);
-};
 </script>
 
 <script>

@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
-import { requestDatabaseTables, requestTable, editTable, delRecordTable, requestTableInfo, requestColsTableInfo, requestColsTableFilterInfo } from "@/api";
+import { requestDatabaseTables, requestTable, editTable, delRecordTable, requestTableInfo, 
+  requestColsTableInfo, requestColsTableFilterInfo, addColumnTable } from "@/api";
 import { useMessage } from '@/stores/message'
 import { useAuthStore } from "@/stores/auth";
 import { USERS_BD, TABLES_USERS_BD } from "@/constants";
@@ -162,8 +163,8 @@ export const useRequests = defineStore("requests", {
             throw e;
         }
       }
-  },
-  async requestTableFilterCols({nameBD, nameTableBD, columns}) {
+      },
+      async requestTableFilterCols({nameBD, nameTableBD, columns}) {
     try {
       return await requestColsTableFilterInfo({nameBD, nameTableBD, columns });
     } catch (e) {
@@ -173,9 +174,22 @@ export const useRequests = defineStore("requests", {
           throw e;
       }
     }
-},
-  
+    },
+    async requestAddTableCol({nameBD, nameTableBD, columnName, columnType }) {
+      const storeMessage = useMessage()
+      try {
+        await addColumnTable({nameBD, nameTableBD, columnName, columnType });
+        storeMessage.setMessage({
+          value: 'Успішно, роздайте дозволи на перегляд',
+          type: 'primary'
+        })
+      } catch (e) {
+        if(e.response.status === 401) {
+          return
+        } else {
+            throw e;
+        }
+      }
   },
-});
-
-
+}
+})

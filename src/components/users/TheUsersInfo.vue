@@ -27,9 +27,6 @@
 import { computed } from "vue";
 import TheUserInfo from "./TheUserInfo.vue";
 
-
-
-
 defineEmits({
   edit: Array,
   del: String,

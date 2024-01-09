@@ -11,9 +11,10 @@
       />
 
       <PermissionsGroup
-        v-if="ollPermissionsOneGroup && allPermissions"
-        :permissions="ollPermissionsOneGroup"
-        :ollPermissions="allPermissions"
+        v-if="ollPermissionsOneGroup && accessPermissionsOneGroup"
+        :permissions="accessPermissionsOneGroup"
+        :group="selectedGroupChoice"
+        :ollPermissions="ollPermissionsOneGroup"
         @edit="editGroupPermission"
       />
     </div>
@@ -37,7 +38,8 @@ import { editGroup, sortArr } from "@/functions";
 
 const requests = useRequests();
 
-const selectedGroupChoice = ref("Виберіть группу");
+const CHOICE_SELECT = 'Виберіть группу'
+const selectedGroupChoice = ref(CHOICE_SELECT);
 
 const isLoading = ref(false);
 const groupList = ref();
@@ -51,10 +53,12 @@ onMounted(async () => {
   // запрашиваю список групп
   groupList.value = await requests.requestTableData(GROUPS_PARAM);
 
+  // убираю группу root со списка. Ее нельзя редактировать
+  // groupList.value = ollGroupList.filter( g=> g.group_name !== 'root')
   // запрашиваю все разрешения
   allPermissions.value = await requests.requestTableData(PERMISSIONS_PARAM);
 
-  //запрашиваю веcь список разрешений для каждой группы
+  //запрашиваю веcь список разрешений для всех групп
   groups_permissions.value = await requests.requestTableData(
     GROUP_PERMISSIONS_PARAM,
   );
@@ -67,23 +71,30 @@ onMounted(async () => {
   isLoading.value = false;
 });
 
-// разрешения одной группы
+// разрешения одной группы с учетом allowed
 const ollPermissionsOneGroup = ref();
-
+const accessPermissionsOneGroup = ref()
 // нахожу все разрешения для искомой группы для передачи в селект
-const editSelectedGroup = async (val) => {
-  selectedGroupChoice.value = val;
 
-  const result = editGroup({
+const editSelectedGroup = async (val) => {
+  if(val !== CHOICE_SELECT) {
+    const { allPermissionsSortName, accessPermissionsName } = editGroup({
     groupList,
     groupName: val,
     groups_permissions,
     allPermissions,
   });
-
-  if (result) {
-    ollPermissionsOneGroup.value = result;
+  if (allPermissionsSortName) {
+    ollPermissionsOneGroup.value = allPermissionsSortName;   
+    accessPermissionsOneGroup.value = accessPermissionsName;
   }
+  selectedGroupChoice.value = val;
+  } else {
+    accessPermissionsOneGroup.value = null;
+    ollPermissionsOneGroup.value = null
+  }
+
+
 };
 
 function foundIdRecord(group, linePermission) {
@@ -94,51 +105,47 @@ function foundIdRecord(group, linePermission) {
       )?.id;
 }
 
-
 // вношу правки (добавление/удаление) разрешений для группы
 const editGroupPermission = async (val) => {
+
+  // нахожу айди и имя группы пользователя
   const group = groupList.value.find(
     (g) => g.group_name === selectedGroupChoice.value,
   );
-  //  строка с данным разрешением
+
+   //  строка с данным разрешением
   const linePermission = allPermissions.value.find(
     (p) => p.permission_name_ukr === val.value,
   );
 
-  if (linePermission) {
-    if (val.type === ADD) {
-      const add = { group_id: group.group_id, permission_id: linePermission.permission_id}
+  const linePermissionsID = foundIdRecord(group, linePermission)
+  if (linePermissionsID) {
+      const edit = {
+        id: linePermissionsID,
+        isEnable: val.type === ADD ? 1 : 0
+      }
+      
+
       try {
         // добавляю запись 
         await requests.requestEditTable({
             nameBD: USERS_BD,
             nameTableBD: GROUP_PERMISSIONS_PARAM.nameTableBD,
-            date: [add],
-            type : 'add'
+            date: edit,
+            type : 'edit'
           })
-
-      const addPerm = [...ollPermissionsOneGroup.value, ...[linePermission]];
-      ollPermissionsOneGroup.value = sortArr(addPerm);
+          let addPerm
+          if(val.type === ADD) {
+            addPerm = [...accessPermissionsOneGroup.value, ...[linePermission]];
+          } else {
+            addPerm = accessPermissionsOneGroup.value.filter(p => p.permission_id !== linePermission.permission_id)
+          }
+      // сортирую по айди
+      accessPermissionsOneGroup.value = sortArr(addPerm);
       } catch (error) {
                   /* empty */
       }
 
-    } else {
-      const linePermissionsDel = foundIdRecord(group, linePermission)
-      if (linePermissionsDel) {
-        try {
-          await requests.requestDelRecordTable({
-            nameBD: USERS_BD,
-            nameTableBD: GROUP_PERMISSIONS_PARAM.nameTableBD,
-            IDs: [linePermissionsDel],
-          });
-          ollPermissionsOneGroup.value = ollPermissionsOneGroup.value.filter(
-        (item) => item.permission_name_ukr !== val.value );
-        } catch (error) {
-          /* empty */
-        }
-      }
-    }
   }
 };
 </script>

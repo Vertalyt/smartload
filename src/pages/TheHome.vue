@@ -1,7 +1,8 @@
 <template>
-  <ModalWrapper v-if="editLineDate" class="h-[96%]">
+  <ModalWrapper v-if="editLineDate" @close="editLineDate = null" class="h-[96%]">
     <TheTableLineEdit
       :date="editLineDate"
+      :nameBTN="nameBTN"
       @update="isUpdateTable"
       @close="editLineDate = null"
     />
@@ -28,6 +29,9 @@
     v-if="sortsDataTable"
     :dataTable="sortsDataTable"
     @edit="editLineID"
+    @add="addLineTable"
+    @del="delLineTable"
+    @column="addCol"
   />
 </template>
 
@@ -46,7 +50,7 @@ import ModalWrapper from "@/components/ModalWrapper.vue";
 import TheTableLineEdit from "@/components/home/table/TheTableLineEdit.vue";
 import TheLabelHome from "@/components/home/TheLabelHome.vue";
 import { useRequests } from "@/stores/requests";
-
+import { ADD, EDIT } from '@/constants'
 
 const storeRequests = useRequests();
 
@@ -65,7 +69,7 @@ const sortsDataTable = ref();
 
 const namesBD = ref();
 const namesTableBD = ref();
-
+const nameBTN = ref(EDIT)
 const tableData = ({ tablesData, nameBD, nameTableBD }) => {
 
   namesBD.value = nameBD;
@@ -96,19 +100,10 @@ const editLineDate = ref();
 
 const editLineID = (id) => {
   editLineDate.value = dataTable.value.filter((line) => line.id === id);
+  nameBTN.value = EDIT
 };
 
-
-const isUpdateTable = async (edit) => {
-  // отправить в SQL правку. после правлю текущие массивы
-  try {
-   const result = await storeRequests.requestEditTable({
-      nameBD: namesBD.value,
-      nameTableBD: namesTableBD.value,
-      date: edit,
-      type: 'edit'
-    });
-    if(result) {
+async function updateLine(edit) {
     // Обновление данных только при успешной отправке запроса
     sortsDataTable.value = updateDataById({
       arrUpdate: sortsDataTable.value,
@@ -119,14 +114,71 @@ const isUpdateTable = async (edit) => {
       editArr: edit,
     });
 
-    editLineDate.value = null;
+}
+
+
+const isUpdateTable = async (edit) => {
+  // отправить в SQL правку. после правлю текущие массивы
+  try {
+
+    const result = await storeRequests.requestEditTable({
+      nameBD: namesBD.value,
+      nameTableBD: namesTableBD.value,
+      date: nameBTN.value === EDIT ? edit : [edit],
+      type: nameBTN.value === EDIT ? 'edit' : 'add'
+    });
+
+    if(result && nameBTN.value === EDIT) {
+      updateLine(edit)
     }
 
+      // добавляю в запись массива вісчитав вручную айди.
+    if(result && nameBTN.value === ADD) {
+      const lastID = String(Number(dataTable.value[dataTable.value.length -1].id) + 1)
+      let recordLine = { id: lastID, ...edit };
+      dataTable.value.push(recordLine)
+      if(sortsDataTable.value.length) {
+        sortsDataTable.value.push(recordLine)
+      }
+    }
+
+    editLineDate.value = null;
     tableFocus();
   } catch (error) {
     console.error("Ошибка при обновлении данных:", error);
   }
 };
+
+const addLineTable = (val) => {
+
+  const notId = { ...val };
+  delete notId.id;
+  for (const key in notId) {
+  notId[key] = '';
+}
+nameBTN.value = ADD
+editLineDate.value = [notId]
+}
+
+const delLineTable = async(id) => {
+  const result = await storeRequests.requestDelRecordTable({
+    nameBD: namesBD.value,
+    nameTableBD: namesTableBD.value,
+    IDs : [id]
+  })
+  if(result) {
+    dataTable.value = dataTable.value.filter(l => l.id !== id)
+    sortsDataTable.value = sortsDataTable.value.filter(l => l.id !== id)
+  }
+}
+
+const addCol = (val) => {
+  storeRequests.requestAddTableCol(
+    {nameBD: namesBD.value, nameTableBD: namesTableBD.value, columnName: String(val), columnType: 'VARCHAR(255)' }
+  );
+};
+
+
 
 </script>
 

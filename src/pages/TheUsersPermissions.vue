@@ -76,7 +76,7 @@ const addUser = async (val) => {
   requests.requestEditTable({
     nameBD: USERS.nameBD,
     nameTableBD: USERS.nameTableBD,
-    date: val,
+    date: [val],
     type: "add",
   });
   // запрашиваю список пользователей заново, так как я не знаю айди который выдаст БД
@@ -101,9 +101,6 @@ const tablesId = (val) => {
   userId.value = val;
   accessEditModal.value = true
 }
-
-
-
 
 const storeAuth = useAuthStore();
 

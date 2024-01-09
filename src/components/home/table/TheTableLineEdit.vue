@@ -32,8 +32,9 @@
       </textarea>
     </div>
     <SubmitButton
-      nameBtn="Редактировать"
+      :nameBtn="nameBTN"
       @submit="onSubmit"
+      id="submitEditForm"
       class="w-full"
       color="green"
     />
@@ -41,7 +42,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import SubmitButton from "@/components/SubmitButton.vue";
 import XMark from "@/assets/img/svg/XMark.vue";
 
@@ -55,6 +56,10 @@ const props = defineProps({
     required: true,
     type: Array,
   },
+  nameBTN: {
+    required: true,
+    type: String,
+  },
 });
 
 const fullDate = ref(props.date[0]);
@@ -62,12 +67,22 @@ const fullDate = ref(props.date[0]);
 const isID = (key) => (key === "id" ? true : false);
 
 const onSubmit = () => {
+
   emit('update', fullDate.value)
 };
 
 const IsClose = () => {
   emit('close')
 }
+
+// устанавливаю фокус на таблицу
+onMounted( () => {
+  const btnSend = document.querySelector('#submitEditForm');
+  if(btnSend) {
+  btnSend.focus()
+  }
+})
+
 
 </script>
 
