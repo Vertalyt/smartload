@@ -2,7 +2,7 @@
 <template>
             <div class="mr-10 flex items-center gap-3">
               <SogSVG class="h-10 text-green-600" />
-              <span class="text-xl font-black">Download</span>
+              <span class="text-xl font-black">SmartLoad</span>
             </div>
 </template>
 

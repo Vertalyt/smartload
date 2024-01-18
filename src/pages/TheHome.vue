@@ -8,7 +8,7 @@
     />
   </ModalWrapper>
 
-  <TheLabelHome @tableData="tableData" @loading="handleLoadingEvent" />
+  <TheLabelHome @tableData="tableData" @loading="handleLoadingEvent" @forbidden="forbidden"/>
 
   <TheLoader v-if="isLoading" />
 
@@ -26,8 +26,11 @@
   >
 
   <TheTable
-    v-if="sortsDataTable"
+    v-if="sortsDataTable && colsLineName.length"
     :dataTable="sortsDataTable"
+    :namesTableBD="namesTableBD"
+    :namesBD="namesBD"
+    :nameCols="colsLineName"
     @edit="editLineID"
     @add="addLineTable"
     @del="delLineTable"
@@ -44,13 +47,14 @@ import {
   colName,
   updateDataById,
   tableFocus,
+  translateCols
 } from "@/functions";
 import TheLoader from "@/components/TheLoader.vue";
 import ModalWrapper from "@/components/ModalWrapper.vue";
 import TheTableLineEdit from "@/components/home/table/TheTableLineEdit.vue";
 import TheLabelHome from "@/components/home/TheLabelHome.vue";
 import { useRequests } from "@/stores/requests";
-import { ADD, EDIT } from '@/constants'
+import { ADD, EDIT, bDLists } from '@/constants'
 
 const storeRequests = useRequests();
 
@@ -63,23 +67,41 @@ const handleLoadingEvent = (newValue) => {
   isLoading.value = newValue;
 };
 
-const generationLineFilters = ref([]);
+
 const dataTable = ref(null);
 const sortsDataTable = ref();
 
 const namesBD = ref();
 const namesTableBD = ref();
 const nameBTN = ref(EDIT)
-const tableData = ({ tablesData, nameBD, nameTableBD }) => {
+
+// массив названий столбцов для фильтра
+const generationLineFilters = ref([]);
+
+// массив названий столбцов для таблицы
+const colsLineName = ref([]);
+
+// ключ/значения перевода каждого столбца таблицы
+const colsNamesTranslation = ref()
+
+const tableData = ({ colsName, tablesData, nameBD, nameTableBD }) => {
 
   namesBD.value = nameBD;
   namesTableBD.value = nameTableBD;
 
+
   generationLineFilters.value.length = 0;
   updateCollapsible.value++;
 
-  // получаю имена столбцов без столбца id
-  generationLineFilters.value = colName(tablesData);
+
+  colsNamesTranslation.value = colsName
+      // получаю имена столбцов без столбца id
+  if(colsNamesTranslation.value) {
+    generationLineFilters.value = colsNamesTranslation.value.map(c => c.name_ua_cols)
+  } else {
+    generationLineFilters.value = colName(tablesData);
+  }
+
 
   // отправляю в компонент фильтров список
   dataTable.value = tablesData;
@@ -92,15 +114,27 @@ const updateCollapsible = ref(1);
 const sortsTable = (sort) => {
   isLoading.value = true;
   sortsDataTable.value = null;
-  sortsDataTable.value = sortAndFilter({ sort, dataTable: dataTable.value });
+  sortsDataTable.value = sortAndFilter({ sort, dataTable: dataTable.value, keyCols: colsNamesTranslation.value });
+
+
+  colsLineName.value = colsNamesTranslation.value.map(c => c.name_ua_cols)
+
   isLoading.value = false;
 };
 
+const forbidden = () => {
+  sortsDataTable.value = null;
+  generationLineFilters.value = [];
+  updateCollapsible.value++;
+}
+
 const editLineDate = ref();
 
+
 const editLineID = (id) => {
-  editLineDate.value = dataTable.value.filter((line) => line.id === id);
-  nameBTN.value = EDIT
+  const date = dataTable.value.filter((line) => line.id === id);
+  editLineDate.value = translateCols({date, colsName:colsNamesTranslation.value, translation: true});
+  nameBTN.value = EDIT; // Assuming 'EDIT' is a string constant
 };
 
 async function updateLine(edit) {
@@ -116,26 +150,25 @@ async function updateLine(edit) {
 
 }
 
-
 const isUpdateTable = async (edit) => {
+  const newEdit = translateCols({date:[edit], colsName:colsNamesTranslation.value, translation: false})
   // отправить в SQL правку. после правлю текущие массивы
   try {
-
     const result = await storeRequests.requestEditTable({
       nameBD: namesBD.value,
       nameTableBD: namesTableBD.value,
-      date: nameBTN.value === EDIT ? edit : [edit],
+      date: nameBTN.value === EDIT ? newEdit[0] : newEdit,
       type: nameBTN.value === EDIT ? 'edit' : 'add'
     });
 
     if(result && nameBTN.value === EDIT) {
-      updateLine(edit)
+      updateLine(newEdit[0])
     }
 
       // добавляю в запись массива вісчитав вручную айди.
     if(result && nameBTN.value === ADD) {
       const lastID = String(Number(dataTable.value[dataTable.value.length -1].id) + 1)
-      let recordLine = { id: lastID, ...edit };
+      let recordLine = { id: lastID, ...newEdit[0] };
       dataTable.value.push(recordLine)
       if(sortsDataTable.value.length) {
         sortsDataTable.value.push(recordLine)
@@ -143,7 +176,7 @@ const isUpdateTable = async (edit) => {
     }
 
     editLineDate.value = null;
-    tableFocus();
+    tableFocus("#sendRef");
   } catch (error) {
     console.error("Ошибка при обновлении данных:", error);
   }
@@ -172,10 +205,26 @@ const delLineTable = async(id) => {
   }
 }
 
-const addCol = (val) => {
+const addCol = async (val) => {
+
+  const valuesString = Object.values(val).join(', ');
+  const keysString = Object.keys(val).join(', ');
+
   storeRequests.requestAddTableCol(
-    {nameBD: namesBD.value, nameTableBD: namesTableBD.value, columnName: String(val), columnType: 'VARCHAR(255)' }
+    {nameBD: namesBD.value, nameTableBD: namesTableBD.value, columnName: valuesString, columnType: 'VARCHAR(255)' }
   );
+
+    // Данные для добавления отправляем только массивом!
+  const date = [{
+    BD_name: namesBD.value,
+    table_name: namesTableBD.value,
+    key_Cols: keysString,
+    name_ua_cols: valuesString,
+  }]
+ const result = await storeRequests.requestEditTable({nameBD: bDLists.bdName, nameTableBD: bDLists.table_name, date, type: 'add' })
+  if(result) {
+    // логика добавления прав и отрисовки текущему порльзователю
+  }
 };
 
 

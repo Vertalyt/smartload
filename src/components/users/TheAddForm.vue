@@ -1,70 +1,43 @@
 <template>
   <form
     action="#"
-    class="wrap flex flex-col sm:flex-row flex-wrap items-center justify-evenly lg:justify-center gap-2 sm:gap-5 py-3 max-w-[1400px]"
+    class="wrap flex flex-col sm:flex-row flex-wrap items-center justify-evenly lg:justify-center gap-2 sm:gap-5 py-3 max-w-[1400px] pl-3"
     @submit.prevent="addUser"
   >
 
     <TheFormElement title="Логін" >
+
     <div class="relative mt-1 rounded-md shadow-sm">
-      <div class="absolute inset-y-0 left-0 flex items-center pl-3">
-        <UserFormSVG
-          class="h-5 w-5 text-gray-400"
-          :class="{ 'text-red-400': nError }"
-        />
+      <div class="absolute inset-y-0 left-0 flex items-center">
+
       </div>
       <input
-        v-model="name"
-        @blur="nBlur"
+        v-model="inputForm"
         type="text"
         id="name"
         name="name"
         required
-        class="h-14 w-40 rounded-md border-gray-300 pl-10 text-sm focus:border-green-500 focus:ring-green-500"
-        :class="{
-          'border-red-300 text-red-900 placeholder:text-red-300 focus:border-red-500 focus:ring-red-500':
-            nError,
-        }"
-        placeholder="John Doe"
+        class="h-14 z-20 rounded-t-md border-gray-300 text-sm focus:border-green-500 focus:ring-green-500 w-52"
+        placeholder="John_Doe"
       />
-      <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-        <ExclamationSVG v-if="nError" class="h-5 w-5 text-red-500" />
-      </div>
-    </div>
-    <p class="mt-2 text-sm text-red-600" v-if="nError">
-      {{ nError }}
-    </p>
-    </TheFormElement>
+        <div>
+          
+          <button 
+          @click.prevent="showLists = !showLists"
+          class="absolute top-1 right-1  flex flex-col items-center justify-center gap-2 border h-12 px-2 hover:bg-gray-200 cursor-pointer rounded-md">
+                  <UserFormSVG
+                  class="h-5 w-5 text-gray-400" />
+                <span class="arrow"></span>
+          </button>
 
-    <TheFormElement title="Емаіл"  >
-    <div class="relative mt-1 rounded-md shadow-sm">
-      <div class="absolute inset-y-0 left-0 flex items-center pl-3">
-        <EmailSVG
-          class="h-5 w-5 text-gray-400"
-          :class="{ 'text-red-400': eError }"
+
+        </div>
+        <TheListsUsersLdap 
+        v-if="showLists"
+        :usersLogin="sortsUserLogin"
+        @user="findUser"
         />
-      </div>
-      <input
-        v-model="email"
-        @blur="eBlur"
-        type="text"
-        id="email"
-        name="email"
-        required
-        class="h-14 w-48 rounded-md border-gray-300 pl-10 text-sm focus:border-green-500 focus:ring-green-500"
-        :class="{
-          'border-red-300 text-red-900 placeholder:text-red-300 focus:border-red-500 focus:ring-red-500':
-            eError,
-        }"
-        placeholder="test@gmail.com"
-      />
-      <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-        <ExclamationSVG v-if="eError" class="h-5 w-5 text-red-500" />
-      </div>
     </div>
-    <p class="mt-2 text-sm text-red-600" v-if="eError">
-      {{ eError }}
-    </p>
     </TheFormElement>
 
     <TheFormElement title="Статус"  >
@@ -116,18 +89,14 @@
 </template>
 
 <script setup>
-import { useField, useForm } from "vee-validate";
-import * as yup from "yup";
 import SubmitButton from "@/components/SubmitButton.vue";
 import UserFormSVG from "@/assets/img/svg/UserFormSVG.vue";
-import EmailSVG from "@/assets/img/svg/EmailSVG.vue";
-import ExclamationSVG from "@/assets/img/svg/ExclamationSVG.vue";
 import RecordsPerPageSelector from "@/components/RecordsPerPageSelector.vue";
-import { ref } from "vue";
+import { ref, watch, computed } from "vue";
 import { statusUsers } from "@/constants";
 import { searchIdGroups } from "@/functions";
 import TheFormElement from "@/components/home/table/TheFormElement.vue";
-
+import TheListsUsersLdap from "./TheListsUsersLdap.vue";
 
 
 
@@ -143,48 +112,91 @@ const props = defineProps({
     required: true,
     type: Array,
   },
+  usersLogin: {
+    required: true,
+    type: Array,
+  },
 });
 
-const {
-  value: name,
-  errorMessage: nError,
-  handleBlur: nBlur,
-} = useField("name", yup.string().trim());
+const sortsUserLogin = ref()
+const sortsUserLoginComputed = computed(() =>  props.usersLogin)
 
-const {
-  value: email,
-  errorMessage: eError,
-  handleBlur: eBlur,
-} = useField("email", yup.string().email().trim());
+watch(sortsUserLoginComputed, val => {
+  sortsUserLogin.value = val
+}, { immediate: true })
+
 
 const radio = ref("0");
+const inputForm = ref()
 
-const { handleSubmit } = useForm();
+
+// Запрещаем вывод кириллицы
+const allowedCharactersRegex = /^[a-zA-Z0-9._@-\s]+$/;
+
+watch(inputForm, (newValue, oldValue) => {
+  if (!allowedCharactersRegex.test(newValue)) {
+    if(newValue === '') {
+      inputForm.value = newValue
+    } else {
+    // Ввод содержит недопустимые символы
+    inputForm.value = oldValue;
+    }
+
+  } else {
+    // Ввод допустим
+    inputForm.value = newValue;
+  }
+});
+
+
+
+watch(inputForm, (val) => {
+  if (val.length > 1) {
+    const lowerVal = val.toLowerCase(); // Привести val к нижнему регистру
+    sortsUserLogin.value = props.usersLogin.filter(user => {
+      // Проверка наличия lowerVal в lowercased user.login
+      return user.login.toLowerCase().includes(lowerVal);
+    });
+  } else {
+    sortsUserLogin.value = props.usersLogin
+  }
+});
+
+
 
 function resetForm() {
   radio.value = "disabled";
   groupUser.value = "Reader";
-  name.value = "";
-  email.value = "";
+  inputForm.value = "";
 }
 
-const addUser = handleSubmit(() => {
+const findUser = (val) => {
+  inputForm.value = val
+  showLists.value = false
+}
+
+const addUser = () => {
   const values = {
-    username: name.value,
-    email: email.value,
+    username: inputForm.value,
     group_id: searchIdGroups(props.usersGroups, groupUser.value),
     active_status: radio.value,
   };
-
   emit("add", values);
 
   resetForm();
-});
+};
 
 const groupUser = ref("Reader");
 const changeGroup = (val) => {
   groupUser.value = val;
 };
+
+const showLists = ref(false)
+
+// дабавляю к ширине ширину селекта
+
+
+
 </script>
 
 <script>
@@ -192,3 +204,16 @@ export default {
   name: "TheAddForm",
 };
 </script>
+
+
+<style scoped>
+.arrow {
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 6px 6px 0 6px;
+  border-color: #555 transparent transparent transparent;
+  pointer-events: none; /* чтобы стрелка не мешала кликам на селекте */
+}
+</style>

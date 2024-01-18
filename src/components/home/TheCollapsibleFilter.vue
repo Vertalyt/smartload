@@ -40,9 +40,11 @@
           animate__fadeOut: isOpenCollapsible,
         }"
       >
-        <div class="align-center mb-5 flex flex-wrap justify-center gap-5">
+        <div 
+        v-if="nameFilter"
+        class="align-center mb-5 flex flex-wrap justify-center gap-5">
           <FilterBTN
-            v-for="(fil, idx) in nameFilterCol"
+            v-for="(fil, idx) in nameFilter"
             :key="idx"
             :nameItem="fil"
             :count="findCount(fil)"
@@ -81,6 +83,8 @@ const props = defineProps({
 const emit = defineEmits({
   sorts: Array
 })
+
+const nameFilter = computed(() => props.nameFilterCol )
 
 const storeMessage = useMessage()
 // выпадающий список
@@ -161,9 +165,9 @@ watch(fullFilter, (val) => {
   }
   if (val === true) {
     // прохожусь по всему списку фильтров и добавляю в массив очередностей
-    for (let i = 0; i < props.nameFilterCol.length; i++) {
+    for (let i = 0; i < nameFilter.value.length; i++) {
       countFilters.value.push({
-        nameFilter: props.nameFilterCol[i],
+        nameFilter: nameFilter.value[i],
         count: i + 1,
       });
       count.value++

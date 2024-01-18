@@ -1,6 +1,7 @@
 
 <template>
   <div class="flex items-center justify-center relative">
+
     <button
         class="rounded-full bg-gray-500 p-1 mr-2 hover:bg-gray-400"
         @click="isState('isEdit')"
@@ -19,6 +20,8 @@
     <TheAddCol @column="$emit('column', $event)"
       />
    
+
+
   </div>
 </template>
 
@@ -30,7 +33,7 @@ import DelRecordSVG from '@/assets/img/svg/DelRecordSVG.vue';
 import TheAddCol from "./TheAddCol.vue";
 
 const emit = defineEmits({
-  column: String,
+  column: Object,
   turn: String,
 });
 

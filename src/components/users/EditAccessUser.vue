@@ -1,11 +1,16 @@
 <template>
 <TheLoader v-if="isLoading" />
-
+  
+  <button
+    id="editAccess"
+  ></button>
   <div
     @click.stop
     class="z-50 rounded-md border border-gray-400 bg-gray-300/80"
   >
-
+      <div class="flex items-center justify-center my-3 gap-3">
+        Логін: <span class="text-xl font-bold">{{ info.username }}</span> 
+      </div>
     <BdCheck 
     class="z-40 border-2 border-gray-400 rounded-md p-2 mx-2 my-0.5"
     v-if="bd_access && bd_lists"
@@ -33,6 +38,7 @@
     :table_access="table_access"
     :cols_access="cols_access"
     :ollCols="ollCols"
+    :colsName="tablesColsName"
     @load="loadOllCols"
     @cols="editAccessCols"
     />
@@ -48,16 +54,15 @@ import ColsCheck from './ColsCheck.vue'
 import { useRequests } from "@/stores/requests";
 import TheLoader from "@/components/TheLoader.vue";
 import { TABLES_USERS_BD } from '@/constants'
-
-
+import {tableFocus, translateColsPermission} from "@/functions";
 
 const emit = defineEmits({
   edit: Object,
 });
 const props = defineProps({
-  id: {
+  info: {
     required: true,
-    type: String,
+    type: Object,
   },
 });
 
@@ -70,7 +75,7 @@ const table_access = ref();
 const cols_access = ref()
 // гружу разрешения пользователя на БД и таблицы. Составляю список БД
 onMounted( async () => {
-  users_access.value = await requests.requestUserData(props.id);
+  users_access.value = await requests.requestUserData(props.info.id);
   bd_lists.value = await requests.requestTableData({
     nameBD: "BD_lists",
     nameTableBD: "BD_lists",
@@ -79,6 +84,7 @@ onMounted( async () => {
     bd_access.value = users_access.value.userBD;
     table_access.value = users_access.value.t_access;
     cols_access.value =  users_access.value.c_access;
+    tableFocus("#editAccess")
 } )
 
 
@@ -108,7 +114,7 @@ function findDelAccess({userParamAccess, newAccess, type}) {
 function findAddAccess({userParamAccess, newAccess, type}) {
   return newAccess.map(b => {
   const access = userParamAccess.find(a => a[type] === b);
-  return !access ? { 'user_id': props.id, [type]: b } : undefined;
+  return !access ? { 'user_id': props.info.id, [type]: b } : undefined;
 }).filter(Boolean);
 }
 
@@ -156,11 +162,11 @@ const editAccessTable = (val) => {
 }
 
 
-const editAccessCols = val => {
-   
+const editAccessCols = (val) => {
+   const newVal =  translateColsPermission({date: val, colsName:tablesColsName.value, translation: false})
   const filterTable = cols_access.value.filter( t => t.bd_name === nameBDCols.value && t.table_name === nameTable.value)
 
-  let addAccess = findAddAccess({userParamAccess:filterTable, newAccess:val, type: 'cols_name' })
+  let addAccess = findAddAccess({userParamAccess:filterTable, newAccess:newVal, type: 'cols_name' })
   if (addAccess.length) {
     addAccess = addAccess.map(t => {
     return {
@@ -169,12 +175,11 @@ const editAccessCols = val => {
       'table_name' : nameTable.value,
     }
   })
-
      //   отправляю запрос на добавление права
-    emit('edit', { value: addAccess, type: 'add', base: TABLES_USERS_BD.c_access, load: true })
+     emit('edit', { value: addAccess, type: 'add', base: TABLES_USERS_BD.c_access, load: true })
   }
 
-  const delAccessTable = findDelAccess({userParamAccess:filterTable, newAccess:val, type: 'cols_name' })
+  const delAccessTable = findDelAccess({userParamAccess:filterTable, newAccess:newVal, type: 'cols_name' })
     // отправляю запрос на удаление права
   if(delAccessTable.length) {
     emit('edit', { value: delAccessTable, type: 'del', base: TABLES_USERS_BD.c_access, load: true })
@@ -186,11 +191,18 @@ const editAccessCols = val => {
 const ollCols = ref()
 const nameTable = ref()
 const nameBDCols = ref()
+const tablesColsName = ref()
+ 
 // запрашиваю все названия столбцов таблицы, и сохраняю название БД и таблицы для запросов
 const loadOllCols = async ({ nameBD, nameTableBD }) => {
   nameTable.value = nameTableBD
   nameBDCols.value = nameBD
-  ollCols.value = await requests.requestColsUser(nameBD, nameTableBD)
+  // запрашиваю переводы названия столбцов
+  tablesColsName.value = await requests.requestNamesTableCol({ nameBD, nameTableBD});
+  const date = await requests.requestColsUser(nameBD, nameTableBD)
+
+  // изменяю названия столбцов с английского на украинский
+  ollCols.value = translateColsPermission({date, colsName:tablesColsName.value, translation: true})
 }
 
 </script>

@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from "@/stores/auth.js";
 import { computed } from 'vue';
 
+
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -41,28 +43,27 @@ const router = createRouter({
         auth: true,
       }
     },
-
-    
   ],
   linkActiveClass: 'active',
   linkExactActiveClass: 'active'
 })
 
-const authStore = computed( () => useAuthStore() ) 
 
 
-router.beforeEach( (to, _, next) => {
+
+router.beforeEach(async (to, _, next) => {
+  const authStore = computed( () => useAuthStore() ) 
   const requiredAuth = to.meta.auth
 
-  if(requiredAuth && authStore.value.isAuthenticated) {
-    next()
-  } 
-  else if(requiredAuth && !authStore.value.isAuthenticated) {
-    next('/auth?message=auth_route')
-  }
-  else {
-    next()
-  }
+if (requiredAuth && authStore.value.isAuthenticated ) {
+  next();
+} 
+else if (requiredAuth && !authStore.value.isAuthenticated) {
+  next('/auth?message=auth_route');
+}
+else {
+  next();
+}
 })
 
 export default router

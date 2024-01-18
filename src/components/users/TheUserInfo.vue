@@ -11,10 +11,36 @@
             {{ user.username }}
           </UserLine>
 
-          <UserLine title="Емаіл:" >
-            {{ user.email }}
+          <UserLine 
+          v-if="user.mail"
+          title="Емаіл:" >
+            {{ user.mail }}
           </UserLine>
 
+
+          
+          <UserLine 
+          v-if="user.telephonenumber"
+          title="Телефон:">
+            {{ user.telephonenumber }}
+          </UserLine>
+
+          <!-- <UserLine 
+          v-if="user.mobile"
+          title="Телефон:">
+          <select
+                  name="isActive"
+                  class="rounded-md"
+                >
+                  <option 
+                  v-for="o in user.mobile" 
+                  :key="o" 
+                  :value="o"
+                  >
+                    {{ o }}
+                  </option>
+                </select>
+          </UserLine> -->
 
           <UserLine 
           title="Група:">
@@ -25,7 +51,6 @@
             @edit="changeGroup"
           />
           </UserLine>
-
 
           <UserLine
           title="Статус:">
@@ -48,7 +73,7 @@
 
         <UserLine title="Дозволи таблиць:" >
           <Permissions_BD_Table 
-          @edit="$emit('tables', user.id)"
+          @edit="$emit('tables', {id: user.id, username:user.username})"
           />
         </UserLine>
 
@@ -89,11 +114,9 @@ const props = defineProps({
    },
 })
 
-
 function isSelected(status) {
   return status === '1' ? statusUsers[0] : statusUsers[1]
 }
-
 
 // Преобразование в нужный формат БД
 function formattedDate(param) {

@@ -9,7 +9,6 @@ export const useAuthStore = defineStore("auth", {
     token: localStorage.getItem(TOKEN_KEY) || null,
     user: null,
     id: null,
-    email: null,
     group_id: null,
     BD_access: null,
     table_access: null,
@@ -86,17 +85,20 @@ export const useAuthStore = defineStore("auth", {
     handleAuthError() {
       this.token = null;
       this.user = null;
+      this.id = null;
+      this.email = null;
+      this.group_id = null;
+      this.BD_access = null,
+      this.table_access = null,
+      this.cols_access = null
       localStorage.removeItem(TOKEN_KEY);
     },
-    userInfo({id, email,group_id, BD_access, table_access, cols_access }) {
+    userInfo({id, group_id, BD_access, table_access, cols_access }) {
       this.id = id;
-      this.email = email;
       this.group_id = group_id;
       this.BD_access = BD_access,
       this.table_access = table_access,
       this.cols_access = cols_access
     }
-    
-
   },
 });

@@ -3,11 +3,17 @@
     <div
       class="relative mb-3 flex flex-col flex-wrap justify-between gap-3 lg:flex-row"
     >
-      <TurnOnEditElements 
-      @column="$emit('column', $event)"
-      @turn="isTurnElActive"
 
-      />
+
+      <div class="flex gap-5">
+        <LoadTableDataVue @load="downloadTable" />
+
+        <TurnOnEditElements
+          @column="$emit('column', $event)"
+          @turn="isTurnElActive"
+        />
+      </div>
+
       <ThePaginate
         v-if="countElements > isSelected"
         :elements="countElements"
@@ -30,10 +36,12 @@
       />
     </div>
 
-    <div class="relative h-full overflow-x-auto" ref="table">
-
-
+    <div 
+    v-if="variableNames"
+    class="relative h-full overflow-x-auto" ref="table">
       <table
+        id="table"
+        ref="table"
         class="relative w-full text-left text-sm text-gray-500 rtl:text-right dark:text-gray-400"
       >
         <thead
@@ -76,6 +84,8 @@
       />
     </div>
   </div>
+
+
 </template>
 
 <script setup>
@@ -86,19 +96,32 @@ import RecordsPerPageSelector from "@/components/RecordsPerPageSelector.vue";
 import TheSearchTable from "@/components/home/table/TheSearchTable.vue";
 import { useResultArray } from "@/composables/PaginationsSorts";
 import { PAGINATE_COAST_VARIABLE } from "@/constants";
-import { tableFocus, sortSearch } from "@/functions";
+import { tableFocus, sortSearch, loadCSV, loadXLS } from "@/functions";
 import SubmitButton from "@/components/SubmitButton.vue";
-import TurnOnEditElements from '@/components/home/table/TurnOnEditElements.vue'
+import TurnOnEditElements from "@/components/home/table/TurnOnEditElements.vue";
+import LoadTableDataVue from "./LoadTableData.vue";
 
 
 defineEmits({
   edit: String,
   add: Object,
   del: String,
-  column: String,
+  column: Object,
 });
 const props = defineProps({
   dataTable: {
+    required: true,
+    type: Array,
+  },
+  namesTableBD: {
+    required: true,
+    type: String,
+  },
+  namesBD: {
+    required: true,
+    type: String,
+  },
+  nameCols: {
     required: true,
     type: Array,
   },
@@ -108,19 +131,33 @@ const dateComputed = computed(() => props.dataTable);
 // первая строка для имен переменных
 
 // сами названия переменных
-const variableNames = ref(sortNameColumn(Object.keys(dateComputed.value[0])));
+const variableNameCols = computed(() => props.nameCols);
+const variableNames = ref()
+
+function addId(val) {
+  const isIdf = val.find(c => c === 'id')
+  if(isIdf) {
+    return sortNameColumn(val)
+  } else {
+    val.unshift('id');
+    return sortNameColumn(val);
+  }
+}
 
 function sortNameColumn(arr) {
   return arr.reduce((acc, key) => {
-  acc[key] = key;
-  return acc;
-}, {})
+    acc[key] = key;
+    return acc;
+  }, {});
 }
+watch(variableNameCols, val => {
+  variableNames.value = addId(val)
+}, { immediate: true })
 
 
 // устанавливаю фокус на таблицу
 onMounted(() => {
-  tableFocus();
+  tableFocus("#sendRef");
 });
 
 const filterSearch = ref();
@@ -144,10 +181,9 @@ const resultArrDate = useResultArray({
   filterSearch,
 });
 
-
 const isCurrentPage = (num) => {
   currentPage.value = num;
-  tableFocus();
+  tableFocus("#sendRef");
 };
 
 // размер пагинатора
@@ -160,7 +196,7 @@ if (pageWidth && pageWidth < 1025) {
 const changeSelectCoast = (coast) => {
   currentPage.value = 1;
   isSelected.value = Number(coast);
-  tableFocus();
+  tableFocus("#sendRef");
 };
 
 const saveFilterSearch = ref(null);
@@ -172,7 +208,7 @@ const isSearch = (search) => {
   }
   saveFilterSearch.value = search;
   filterSearch.value = sortSearch({ search, arr: dateComputed.value });
-  tableFocus();
+  tableFocus("#sendRef");
 };
 
 // сброс фильтра поиска
@@ -193,7 +229,8 @@ watch(
         filterSearch.value = sort;
       }
     }
-    variableNames.value = sortNameColumn(Object.keys(val[0]));
+    // variableNames.value = sortNameColumn(Object.keys(val[0]));
+    countElements.value = dateComputed.value.length - 1;
   },
   { deep: true },
 );
@@ -223,13 +260,56 @@ const isResets = () => {
   filterSearch.value = null;
 };
 
-
-const isTurnEl = ref('')
+const isTurnEl = ref("");
 
 const isTurnElActive = (val) => {
-  isTurnEl.value = val
-  tableFocus();
+  isTurnEl.value = val;
+  tableFocus("#sendRef");
+};
+
+const table = ref();
+let styleFileName
+if(import.meta.env.VITE_STYLE_FILE_NAME) {
+  styleFileName = `http://10.100.6.3/assets/${import.meta.env.VITE_STYLE_FILE_NAME}`
+} else {'https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css';
+  styleFileName
 }
+
+
+const downloadTable = async (val) => {
+  if (val === "csv") {
+    loadCSV({
+      data: dateComputed.value,
+      nameBook: props.namesBD,
+      nameList: props.namesTableBD,
+    });
+  } else if (val === "xls") {
+    await loadXLS({
+      data: dateComputed.value,
+      nameBook: props.namesBD,
+      nameList: props.namesTableBD,
+    });
+  } else if (val === "pdf") {
+    // Создаем новое окно
+    const printWindow = window.open("", "_blank");
+    const url = 'http://10.100.6.3/assets/index-672de43e.css' || 'https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css'
+   
+   
+    printWindow.document.write(`
+  <html>
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link rel="stylesheet" href="${url}" onload="window.print()">
+    </head>
+    <body>
+      ${table.value.outerHTML}
+    </body>
+  </html>
+`)
+  }
+};
+
 
 </script>
 

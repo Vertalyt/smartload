@@ -11,7 +11,7 @@
           class="rounded-2xl border-blue-200 px-4 py-2 text-xl font-semibold text-gray-700 shadow-lg transition duration-150 ease-in-out hover:bg-blue-300 hover:text-white hover:shadow-xl focus:shadow-xl focus:outline-none focus:ring-0 focus:ring-blue-300 focus:ring-offset-1"
           :class="activeClass"
           >
-          {{ nameItem }}
+          {{ nameItemComputed }}
         </button>
       </div>
 </template>
@@ -42,6 +42,7 @@ const props = defineProps({
 const isActive = ref(false)
 const isOllActively = computed( () => props.ollActively )
 
+const nameItemComputed = computed( () => props.nameItem )
 watch(isOllActively, val => {
   val ? isActive.value = true : isActive.value = false 
 }, { immediate: true })

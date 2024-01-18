@@ -1,4 +1,6 @@
 
+export const allowed_group = { 'group': [1, 2], 'users': [1, 2] };
+
 export const COLOR_VARIABLE_BTN =  { 
       blue: 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500',
       red: 'bg-red-500 hover:bg-red-700 focus:ring-red-600',
@@ -53,8 +55,6 @@ export const USERS = {
 };
 
 
-
-
 export const MENUDATE = [
   { name: 'Головна', link: '/' },
   { name: 'Групи', link: '/group-permissions' },
@@ -62,3 +62,8 @@ export const MENUDATE = [
 ]
 
 export const statusUsers = ["Активно", "Вимкнено"];
+
+export const bDLists = {
+  bdName: 'BD_lists',
+  table_name: 'lis_names_tables_col'
+}

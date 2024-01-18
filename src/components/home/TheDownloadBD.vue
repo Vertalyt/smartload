@@ -30,6 +30,7 @@ import { useAuthStore } from '@/stores/auth'
 const emit = defineEmits({
   tableData: Object,
   loading: [Boolean],
+  forbidden: null
 });
 
 
@@ -53,7 +54,7 @@ const addBD = async (val) => {
   } else {
     listsNameBD.value = ['Звернітся до адміністратора']
   }
-
+  choiceTable.value = 'Виберіть таблицю'
 }
 
 const cols_access = computed( () => authStore.getProperty('cols_access')) 
@@ -62,11 +63,36 @@ const adTable = async (val) => {
   choiceTable.value = val
 
   const sortColsAccess = cols_access.value.filter(c => c.bd_name === choiceBD.value && c.table_name === val).map(c => c.cols_name)
-  sortColsAccess.unshift('id')
-  const tablesData = await requests.requestTableFilterCols({ nameBD: choiceBD.value, nameTableBD: val, columns: sortColsAccess});
-    if(tablesData) {
-    emit('tableData', {tablesData, nameBD: choiceBD.value, nameTableBD: val})
+  if(sortColsAccess.length > 0) {
+    sortColsAccess.unshift('id')
+    let tablesColsName = await requests.requestNamesTableCol({ nameBD: choiceBD.value, nameTableBD: val});
+
+
+
+
+    const t_access =  authStore.getProperty('cols_access')
+
+    tablesColsName = tablesColsName.map( c => {
+      const findAccess = t_access.find(a => a.bd_name === c.BD_name && a.table_name === c.table_name && a.cols_name === c.key_Cols)
+        if(findAccess) {
+          return c
+        } else {
+          return undefined
+        }
+    } ).filter(r => r !== undefined)
+
+    // сортировка по разрешенным правам доступа.
+    const tablesData = await requests.requestTableFilterCols({ nameBD: choiceBD.value, nameTableBD: val, columns: sortColsAccess});
+
+    if(tablesData ) {
+    emit('tableData', {colsName:tablesColsName, tablesData, nameBD: choiceBD.value, nameTableBD: val})
     }
+  }  
+
+  if(sortColsAccess.length === 0) {
+    emit('forbidden')
+  }
+
     emit('loading', false)
 }
 
@@ -78,4 +104,7 @@ export default {
   name: 'TheDownloadBD',
 }
 </script>
+
+
+
 

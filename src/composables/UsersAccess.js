@@ -1,4 +1,4 @@
-import { watch, ref } from 'vue'
+import { watch, ref,  } from 'vue'
 
 export function useBDAccess(BD_access) {
     const result = ref()
@@ -12,9 +12,8 @@ export function useBDAccess(BD_access) {
   }
 
 
-  export function itemsAccess({items, itemsAccessFilter, type, immediate}) {
+  export function useItemsAccess({items, itemsAccessFilter, type, immediate = false}) {
     const result = ref() 
-
     watch(items, (val) => {
         result.value = val.map((b) => {
           const userBD = itemsAccessFilter.value.find((u) => u[type] === b);
@@ -23,6 +22,27 @@ export function useBDAccess(BD_access) {
             check: Boolean(userBD),
           };
         });
-      }, { immediate });
+      }, { immediate, deep:true });
+
       return result
+  }
+
+
+
+  export function useUsersLogin({listsUsers}) {
+    const result = ref()
+
+    watch(listsUsers, val => {
+     
+      result.value = val
+      .map((u) => {
+        return {
+          login: u.samaccountname,
+        };
+      })
+      .sort((a, b) => a.login.localeCompare(b.login));
+    }, { immediate : true }  )
+
+
+    return result.value
   }

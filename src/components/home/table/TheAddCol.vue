@@ -14,6 +14,7 @@
               v-if="isCol"
               v-model.trim="modelInputAddCol"
               placeholder="Назва стовпця"
+              maxlength="40"
               class="absolute left-0 z-10 rounded-xl bg-gray-200 hover:bg-gray-300 p-1.5 text-center w-52 text-gray-600 font-semibold"
               >
 
@@ -36,9 +37,12 @@
 import { ref, watch } from "vue";
 import PlusSVG from "@/assets/img/svg/PlusSVG.vue";
 import AbortSVG from "@/assets/img/svg/AbortSVG.vue";
+import { translit } from '@/functions'
+
+
 
 const emit = defineEmits({
-  column: String
+  column: Object
 });
 
 
@@ -48,7 +52,8 @@ const isCol = ref(false)
 const modelInputAddCol = ref();
 
 // разрешаю только латиницу, цифри и нижнее подчеркивание. Первый символ обязательно буква латиницы
-const regex = /^[a-zA-Z][_a-zA-Z0-9]*$/;
+const regex = /^[a-zA-Zа-яА-ЯҐґЄєІіЇїЙйЬьЮюЯя0-9_][a-zA-Zа-яА-ЯҐґЄєІіЇїЙйЬьЮюЯя0-9_]*$/;
+// const regex = /^[a-zA-Z][_a-zA-Z0-9]*$/; 
 watch(modelInputAddCol, (newValue, oldValue) => {
   if (!regex.test(newValue)) {
     newValue === '' 
@@ -67,7 +72,14 @@ const isClose = () => {
 const addCol = () => {
   if(isCol.value) {
     if(modelInputAddCol.value) {
-      emit('column', modelInputAddCol.value)
+      const date = new Date()
+      const timestamp = date.getTime();
+      const key = translit(modelInputAddCol.value)
+      const nameCol = {
+        [`_${key}_${timestamp}`] : `${modelInputAddCol.value}`
+      }
+
+      emit('column', nameCol)
       modelInputAddCol.value= null
     }
     isCol.value = false

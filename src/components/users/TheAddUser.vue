@@ -5,6 +5,7 @@
       <TheAddForm 
       :variable="variable"
       :usersGroups="usersGroups"
+      :usersLogin="usersLogin"
       @add="($event) => $emit('add', $event)"
       />
   </div>
@@ -22,6 +23,10 @@ defineProps({
     type: Array,
   },
   usersGroups: {
+    required: true,
+    type: Array
+   },
+   usersLogin: {
     required: true,
     type: Array
    },

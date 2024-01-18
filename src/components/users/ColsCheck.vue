@@ -33,10 +33,10 @@
 
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import RecordsPerPageSelector from "../RecordsPerPageSelector.vue";
 import UserSelectedAccess from "./UserSelectedAccess.vue";
-import { useBDAccess, itemsAccess } from '@/composables/UsersAccess'
+import { useBDAccess, useItemsAccess } from '@/composables/UsersAccess'
 
 const emit = defineEmits({
   load: String,
@@ -59,10 +59,16 @@ const props = defineProps({
     required: false,
     type: Array,
   },
+  colsName: {
+    required: false,
+    type: [Array, undefined],
+  },
 })
 
 const BD_access = computed(() => props.bd_access);
 const table_access = computed(() => props.table_access);
+const nameCols = computed(() => props.colsName);
+
 const nameBD = useBDAccess(BD_access);
 
 const choiceBD = ref("Виберіть БД");
@@ -72,6 +78,7 @@ const tableWithBDAccess = ref()
 const choiceTable = ref("Виберіть таблицю");
 
 const tableSelection = (val) => {
+  choiceTable.value = "Виберіть таблицю";
   choiceBD.value = val;
   tableWithBDAccess.value = table_access.value.filter(t => t.bd_name === val).map(t => t.table_name)
 };
@@ -79,16 +86,30 @@ const tableSelection = (val) => {
 
 const colsSelection = async (val) => {
   choiceTable.value = val
-  cols_accessFilter.value = props.cols_access.filter(t => t.bd_name === choiceBD.value && t.table_name === val)
+  cols_accessFilter.value = props.cols_access.filter(t => t.bd_name === choiceBD.value && t.table_name === val) 
   emit('load', { nameBD:choiceBD.value, nameTableBD:val })
 }
 
 const computedOllCols = computed(() => props.ollCols )
 
+  watch(nameCols, val => {
+    cols_accessFilter.value = cols_accessFilter.value.map(i => {
+      const find = val.find(c => c.key_Cols === i.cols_name)
+      if(find) {
+        return {
+          ...i,
+          cols_name: find.name_ua_cols
+        }
+      } else {
+        return i
+      }
+    })
+  })
+
 // добавляю флаг к каждой таблицы, разрешена ли она
-const editAccessCols = itemsAccess({
+const editAccessCols = useItemsAccess({
   items: computedOllCols, 
-  itemsAccessFilter: cols_accessFilter, 
+  itemsAccessFilter: cols_accessFilter,
   type:'cols_name' })
 
 </script>

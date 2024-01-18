@@ -15,7 +15,7 @@
 <script setup>
 import { computed } from 'vue'
 import UserSelectedAccess from './UserSelectedAccess.vue';
-import { itemsAccess } from '@/composables/UsersAccess'
+import { useItemsAccess } from '@/composables/UsersAccess'
 
 
 defineEmits({
@@ -37,7 +37,7 @@ const computedBdAccess = computed(() => props.bd_access);
 const computedOllBDName = computed(() => props.bd_lists.map(b => b.bd_name));
 
 // добавляю флаг к каждой БД флаг, разрешена ли она
-const editAccessBD =  itemsAccess({
+const editAccessBD =  useItemsAccess({
   items: computedOllBDName, 
   itemsAccessFilter: computedBdAccess, 
   type:'bd_name',

@@ -8,7 +8,7 @@
         </span>
     </div>
 
-    <TheDownloadBD @tableData="$emit('tableData', $event)" @loading="$emit('loading', $event)"/>
+    <TheDownloadBD @tableData="$emit('tableData', $event)" @loading="$emit('loading', $event)"  @forbidden="$emit('forbidden')"/>
   </div>
 </template>
 
@@ -16,7 +16,7 @@
 <script setup>
 import TheDownloadBD from '@/components/home/TheDownloadBD.vue'
 
-defineEmits(['tableData', 'loading']);
+defineEmits(['tableData', 'loading', 'forbidden']);
 
 </script>
 

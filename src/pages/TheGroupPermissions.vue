@@ -35,6 +35,8 @@ import TheLoader from "@/components/TheLoader.vue";
 import RecordsPerPageSelector from "@/components/RecordsPerPageSelector.vue";
 import PermissionsGroup from "@/components/PermissionsGroup.vue";
 import { editGroup, sortArr } from "@/functions";
+import { useAccessPage } from '@/composables/useAccess'
+
 
 const requests = useRequests();
 
@@ -47,7 +49,10 @@ const allPermissions = ref();
 const selectedGroupName = ref([]);
 const groups_permissions = ref();
 
+
 onMounted(async () => {
+  useAccessPage('group')
+
   isLoading.value = true;
 
   // запрашиваю список групп

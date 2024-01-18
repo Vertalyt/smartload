@@ -69,7 +69,7 @@ export async function requestDatabaseTables(nameTableBD) {
 
 // правка таблицы date должен быть массивом при добавлении записей
 export async function editTable({ nameBD, nameTableBD, date, type }) {
-
+  console.log({ nameBD, nameTableBD, date, type });
   const urlVariable =  { 
      edit : import.meta.env.VITE_URL_Edit_record,
      add : import.meta.env.VITE_URL_Tables_ADD_Record,
@@ -166,7 +166,6 @@ export async function addColumnTable({ nameBD, nameTableBD, columnName, columnTy
 
   const url = import.meta.env.VITE_URL_Tables_Add_Col
 
-  console.log(url, nameBD, nameTableBD, columnName, columnType);
   try {
     const result = await instance.post(url, { nameBD, nameTableBD, columnName, columnType }, {
       headers: {
@@ -174,6 +173,38 @@ export async function addColumnTable({ nameBD, nameTableBD, columnName, columnTy
       }
     });
     return result;
+  } catch (error) {
+    if(error?.response?.status === 401) {
+      console.log('message', error.message);
+    } else {
+        throw error;
+    }
+  }
+}
+
+// запрашиваю пользователей
+export async function namesUsers() {
+  const url = import.meta.env.VITE_URL_Name_Lists
+  try {
+    const result = await instance.post(url);
+    return result.data;
+  } catch (error) {
+    if(error?.response?.status === 401) {
+      console.log('message', error.message);
+    } else {
+        throw error;
+    }
+  }
+}
+
+
+// запрос имен столбцов конкретной таблицы
+export async function namesTableCol({nameBD, nameTableBD}) {
+
+  const url = `${import.meta.env.VITE_URL_Name_Cols_Table}?BD_name=${nameBD}&table_name=${nameTableBD}`;
+  try {
+    const response = await instance.get(url);
+    return response.data;
   } catch (error) {
     if(error?.response?.status === 401) {
       console.log('message', error.message);

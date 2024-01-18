@@ -25,7 +25,7 @@
 import { ref, computed } from "vue";
 import RecordsPerPageSelector from "../RecordsPerPageSelector.vue";
 import UserSelectedAccess from "./UserSelectedAccess.vue";
-import { useBDAccess, itemsAccess } from '@/composables/UsersAccess'
+import { useBDAccess, useItemsAccess } from '@/composables/UsersAccess'
 
 
 const emit = defineEmits({
@@ -59,12 +59,17 @@ const tableSelection = async (val) => {
 
 const computedOllTablesName = computed(() => props.ollTablesName);
 const computedTableAccess = computed(() => props.table_access)
+
+
+
+
 // добавляю флаг к каждой таблицы, разрешена ли она
-const editAccessTable = itemsAccess({
+const editAccessTable = useItemsAccess({
   items: computedOllTablesName, 
   itemsAccessFilter: computedTableAccess,
   type: 'table_name'
 })
+
 
 </script>
 

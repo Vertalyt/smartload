@@ -1,17 +1,22 @@
 import { defineStore } from "pinia";
 import { requestDatabaseTables, requestTable, editTable, delRecordTable, requestTableInfo, 
-  requestColsTableInfo, requestColsTableFilterInfo, addColumnTable } from "@/api";
+  requestColsTableInfo, requestColsTableFilterInfo, addColumnTable, namesUsers, namesTableCol } from "@/api";
 import { useMessage } from '@/stores/message'
 import { useAuthStore } from "@/stores/auth";
 import { USERS_BD, TABLES_USERS_BD } from "@/constants";
-
+// import { users } from '@/api/users'
 
 export const useRequests = defineStore("requests", {
   state: () => ({
-    user: [],
+    users: null,
   }),
   getters: {
-
+    getUsersList(state) {
+      return state.users;
+    },
+    isUsersList(state) {
+      return !!state.users;
+    },
   },
   actions: {
     // запрос названия таблиц в БД
@@ -47,6 +52,7 @@ export const useRequests = defineStore("requests", {
     },
     // правка таблицы
     async requestEditTable({ nameBD, nameTableBD, date, type }) {
+
       const storeMessage = useMessage()
       try {
         const result = await editTable({ nameBD, nameTableBD, date, type });
@@ -94,11 +100,12 @@ export const useRequests = defineStore("requests", {
         }
       }
     },
-    // запрос таблицы c фильтром
+
+    // запрос разрешения и инфо пользователя
     async requestUserDataFilter({filterValue}) {
       
       try {
-        // получаю с БД айди пользоватоля
+        // получаю с БД айди пользоватоля по логину
         const userInfo = await requestTableInfo({nameBD:USERS_BD, nameTableBD:TABLES_USERS_BD.info, filterColumn: "username", filterValue});
         if(userInfo) {
           // запрашиваю разрешенные БД 
@@ -116,7 +123,6 @@ export const useRequests = defineStore("requests", {
          const authStore = useAuthStore();
           authStore.userInfo({
             id: Number(userInfo[0].id),
-            email: userInfo[0].email,
             group_id: userInfo[0].group_id,
             BD_access: BD_name,
             table_access: t_access,
@@ -131,7 +137,7 @@ export const useRequests = defineStore("requests", {
         }
       }
     },
-    // запрос айди и разрешений пользователя
+    // запрос разрешений пользователя
     async requestUserData(id) {
     try {
        // запрашиваю разрешенные БД
@@ -191,5 +197,34 @@ export const useRequests = defineStore("requests", {
         }
       }
   },
+  async requestsNameUsers() {
+    try {
+      const result = await namesUsers();
+      this.users = result.oll_users
+      return result.oll_users
+      // const result = users
+      // this.users = result
+      // return result
+    } catch (e) {
+      if(e.response.status === 401) {
+        return
+      } else {
+          throw e;
+      }
+    }
+  },
+async requestNamesTableCol({nameBD, nameTableBD}) {
+  try {
+   return await namesTableCol({nameBD, nameTableBD});
+
+  } catch (e) {
+    if(e.response.status === 401) {
+      return
+    } else {
+        throw e;
+    }
+  }
+},
+  
 }
 })
