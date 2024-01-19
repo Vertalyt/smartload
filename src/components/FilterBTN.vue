@@ -27,7 +27,7 @@ const emit = defineEmits({
 const props = defineProps({
   nameItem: {
     required: true,
-    type: String,
+    type: Object,
   },
   count:{
     required: false,
@@ -42,14 +42,14 @@ const props = defineProps({
 const isActive = ref(false)
 const isOllActively = computed( () => props.ollActively )
 
-const nameItemComputed = computed( () => props.nameItem )
+const nameItemComputed = computed( () => props.nameItem.name_ua_cols )
 watch(isOllActively, val => {
   val ? isActive.value = true : isActive.value = false 
 }, { immediate: true })
 
 const isClick = () => {
   isActive.value = !isActive.value
-  emit('active', {activeBtn: isActive.value, name: props.nameItem } )
+  emit('active', {activeBtn: isActive.value, name: props.nameItem.key_Cols } )
 }
 
 const activeClass = computed( () => isActive.value ? 'bg-blue-300' : 'bg-blue-100') 

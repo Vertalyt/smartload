@@ -1,4 +1,6 @@
-import { watch, ref,  } from 'vue'
+import { watch, ref } from 'vue'
+import { useAuthStore } from '@/stores/auth'
+
 
 export function useBDAccess(BD_access) {
     const result = ref()
@@ -45,4 +47,20 @@ export function useBDAccess(BD_access) {
 
 
     return result.value
+  }
+
+
+  export function useAccessColl(tablesColsName) {
+    const authStore = useAuthStore()
+    const t_access = authStore.getProperty('cols_access')
+
+   return tablesColsName.map( c => {
+      const findAccess = t_access.find(a => a.bd_name === c.BD_name && a.table_name === c.table_name && a.cols_name === c.key_Cols)
+        if(findAccess) {
+          return c
+        } else {
+          return undefined
+        }
+    } ).filter(r => r !== undefined)
+
   }

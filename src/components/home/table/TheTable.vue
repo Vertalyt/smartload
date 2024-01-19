@@ -47,7 +47,7 @@
         <thead
           class="top-0 bg-gray-50 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-400"
         >
-          <TableLine :line="variableNames" :thead="true"> </TableLine>
+          <TableLineNameCols :line="variableNames" /> 
         </thead>
 
         <tbody>
@@ -100,7 +100,7 @@ import { tableFocus, sortSearch, loadCSV, loadXLS } from "@/functions";
 import SubmitButton from "@/components/SubmitButton.vue";
 import TurnOnEditElements from "@/components/home/table/TurnOnEditElements.vue";
 import LoadTableDataVue from "./LoadTableData.vue";
-
+import TableLineNameCols from '@/components/home/table/TableLineNameCols.vue'
 
 defineEmits({
   edit: String,
@@ -135,21 +135,17 @@ const variableNameCols = computed(() => props.nameCols);
 const variableNames = ref()
 
 function addId(val) {
-  const isIdf = val.find(c => c === 'id')
+  const isIdf = val.find(c => c.nameCols === 'id')
   if(isIdf) {
-    return sortNameColumn(val)
+    return val
   } else {
-    val.unshift('id');
-    return sortNameColumn(val);
+    val.unshift({
+      name_ua_cols: 'id',
+    } );
+    return val;
   }
 }
 
-function sortNameColumn(arr) {
-  return arr.reduce((acc, key) => {
-    acc[key] = key;
-    return acc;
-  }, {});
-}
 watch(variableNameCols, val => {
   variableNames.value = addId(val)
 }, { immediate: true })
@@ -229,7 +225,7 @@ watch(
         filterSearch.value = sort;
       }
     }
-    // variableNames.value = sortNameColumn(Object.keys(val[0]));
+
     countElements.value = dateComputed.value.length - 1;
   },
   { deep: true },

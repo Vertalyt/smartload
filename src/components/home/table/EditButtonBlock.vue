@@ -10,7 +10,7 @@
     </button>
 
       <button
-        v-if="!thead && nameLine === 'id' && isTurnEl === 'isEdit'"
+        v-if="nameLine === 'id' && isTurnEl === 'isEdit'"
         class="rounded-full bg-gray-500 p-1 mr-2 hover:bg-gray-400"
         @click="$emit('edit', lineId)"
       >
@@ -32,10 +32,6 @@ defineProps({
   nameLine : {
     required: true,
     type: String
-  },
-  thead : {
-    required: true,
-    type: Boolean
   },
   lineId : {
     required: true,

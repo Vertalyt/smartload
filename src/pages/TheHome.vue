@@ -54,10 +54,13 @@ import ModalWrapper from "@/components/ModalWrapper.vue";
 import TheTableLineEdit from "@/components/home/table/TheTableLineEdit.vue";
 import TheLabelHome from "@/components/home/TheLabelHome.vue";
 import { useRequests } from "@/stores/requests";
-import { ADD, EDIT, bDLists } from '@/constants'
+import { useAuthStore } from '@/stores/auth'
+import { ADD, EDIT, bDLists, TABLES_USERS_BD, USERS_BD } from '@/constants'
+import { useAccessColl } from '@/composables/UsersAccess'
+
 
 const storeRequests = useRequests();
-
+const authStore = useAuthStore()
 
 
 // запускаю анимацию загрузки
@@ -89,7 +92,6 @@ const tableData = ({ colsName, tablesData, nameBD, nameTableBD }) => {
   namesBD.value = nameBD;
   namesTableBD.value = nameTableBD;
 
-
   generationLineFilters.value.length = 0;
   updateCollapsible.value++;
 
@@ -97,14 +99,20 @@ const tableData = ({ colsName, tablesData, nameBD, nameTableBD }) => {
   colsNamesTranslation.value = colsName
       // получаю имена столбцов без столбца id
   if(colsNamesTranslation.value) {
-    generationLineFilters.value = colsNamesTranslation.value.map(c => c.name_ua_cols)
+    generationLineFilters.value = colsNamesTranslation.value.map(c => {
+      return {
+        key_Cols: c.key_Cols,
+        name_ua_cols: c.name_ua_cols
+      }
+    } )
+
   } else {
     generationLineFilters.value = colName(tablesData);
   }
 
-
   // отправляю в компонент фильтров список
   dataTable.value = tablesData;
+
 };
 
 // флаг обновления пагинатора
@@ -112,14 +120,23 @@ const updateCollapsible = ref(1);
 
 // сортирую по данным из фильтра
 const sortsTable = (sort) => {
+
   isLoading.value = true;
   sortsDataTable.value = null;
   sortsDataTable.value = sortAndFilter({ sort, dataTable: dataTable.value, keyCols: colsNamesTranslation.value });
 
+  colsLineName.value = colsNamesTranslation.value
+  .filter(n => sort.some(f => f.nameFilter === n.key_Cols))
+  .map(c => {
+        return {
+          name_ua_cols:c.name_ua_cols,
+        }
+      })
+  .filter(Boolean);
 
-  colsLineName.value = colsNamesTranslation.value.map(c => c.name_ua_cols)
 
   isLoading.value = false;
+  tableFocus("#sendRef");
 };
 
 const forbidden = () => {
@@ -165,7 +182,7 @@ const isUpdateTable = async (edit) => {
       updateLine(newEdit[0])
     }
 
-      // добавляю в запись массива вісчитав вручную айди.
+      // добавляю в запись массива высчитав вручную айди.
     if(result && nameBTN.value === ADD) {
       const lastID = String(Number(dataTable.value[dataTable.value.length -1].id) + 1)
       let recordLine = { id: lastID, ...newEdit[0] };
@@ -205,13 +222,16 @@ const delLineTable = async(id) => {
   }
 }
 
+// const message = useMessage()
 const addCol = async (val) => {
+  isLoading.value = true;
 
   const valuesString = Object.values(val).join(', ');
   const keysString = Object.keys(val).join(', ');
 
+  // добавляю столбец в таблицу
   storeRequests.requestAddTableCol(
-    {nameBD: namesBD.value, nameTableBD: namesTableBD.value, columnName: valuesString, columnType: 'VARCHAR(255)' }
+    {nameBD: namesBD.value, nameTableBD: namesTableBD.value, columnName: keysString, columnType: 'VARCHAR(255)' }
   );
 
     // Данные для добавления отправляем только массивом!
@@ -221,10 +241,73 @@ const addCol = async (val) => {
     key_Cols: keysString,
     name_ua_cols: valuesString,
   }]
+
+// добавляю столбец с таблицу переводов
  const result = await storeRequests.requestEditTable({nameBD: bDLists.bdName, nameTableBD: bDLists.table_name, date, type: 'add' })
   if(result) {
+    const idUser = authStore.getProperty('id')
     // логика добавления прав и отрисовки текущему порльзователю
+    const newAccess = {
+      user_id:idUser,
+      bd_name:namesBD.value,
+      table_name:namesTableBD.value,
+      cols_name: keysString,
+    }
+
+    // добавляю в разрешенные столбцы текущему пользователю
+   const data =  await storeRequests.requestEditTable({nameBD: USERS_BD, nameTableBD: TABLES_USERS_BD.c_access, date:[newAccess], type: 'add' })
+    if(data) {
+    //  загрузить заново таблицы разрешений и профильтровать все названия
+
+    //  добавляю разрешение в стор
+      authStore.addCols_Access({
+        bd_name: namesBD.value,
+        table_name: namesTableBD.value,
+        cols_name: keysString,
+      })
+
+     // запрашиваю обновленные названия столбцов (предыдущего запроса и фильтрации нет в этом компоненте, далеко лезть)
+      let tablesColsName = await storeRequests.requestNamesTableCol({ nameBD: namesBD.value, nameTableBD: namesTableBD.value});
+
+      // фильтрую названия столбцов по разрешениям.
+      colsNamesTranslation.value = useAccessColl(tablesColsName)
+   
+
+
+
+      
+     // имена всех столбцов для фильтра
+     generationLineFilters.value = colsNamesTranslation.value.map(c => {
+      return {
+        key_Cols: c.key_Cols,
+        name_ua_cols: c.name_ua_cols
+      }
+    } )
+      // имена столбцов отфльтрованных по разрешению для таблицы
+      colsLineName.value = colsNamesTranslation.value.map(c => {
+        return {
+          name_ua_cols:c.name_ua_cols,
+          key_Cols: c.name_ua_cols
+        }
+      })
+
+      // sortsDataTable.value = null
+      dataTable.value = [...dataTable.value.map(l => {
+        return {
+          ...l,
+          [keysString]: ''
+        }
+      })]
+
+      sortsDataTable.value = [...sortsDataTable.value.map(l => {
+        return {
+          ...l,
+          [keysString]: ''
+        }
+      })]
+    }
   }
+  isLoading.value = false;
 };
 
 

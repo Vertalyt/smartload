@@ -99,6 +99,15 @@ export const useAuthStore = defineStore("auth", {
       this.BD_access = BD_access,
       this.table_access = table_access,
       this.cols_access = cols_access
+    },
+    addCols_Access({bd_name, table_name, cols_name}) {
+      this.cols_access = [...this.cols_access, {
+        id: this.cols_access.lengths,
+        user_id: this.id,
+        bd_name: bd_name,
+        table_name: table_name,
+        cols_name: cols_name
+      }]
     }
   },
 });

@@ -44,10 +44,10 @@
         v-if="nameFilter"
         class="align-center mb-5 flex flex-wrap justify-center gap-5">
           <FilterBTN
-            v-for="(fil, idx) in nameFilter"
-            :key="idx"
+            v-for="fil in nameFilter"
+            :key="fil.key_Cols"
             :nameItem="fil"
-            :count="findCount(fil)"
+            :count="findCount(fil.key_Cols)"
             :ollActively="ollActively"
             @active="isActiveBtnFilter"
           />
@@ -85,7 +85,6 @@ const emit = defineEmits({
 })
 
 const nameFilter = computed(() => props.nameFilterCol )
-
 const storeMessage = useMessage()
 // выпадающий список
 const isOpenCollapsible = ref(false);
@@ -104,8 +103,11 @@ const ollFilter = () => {
   fullFilter.value = false
   ollActively.value = false
   nextTick( () => {
+    ollActively.value = true
+  } )
+  
+  nextTick( () => {
     fullFilter.value = true
-  ollActively.value = true
   } )
 }
 
@@ -113,7 +115,6 @@ const ollFilter = () => {
 const ollActively = ref(false);
 
 const isActiveBtnFilter = ({ activeBtn, name }) => {
-
   // ищу по списку фильтров, есть ли такая уже запись
   const existingFilter = countFilters.value.find(
     (btn) => btn.nameFilter === name,
@@ -144,8 +145,7 @@ const isActiveBtnFilter = ({ activeBtn, name }) => {
 
 // ищу по названию фильтра его очередность для вывода в кнопку очереди. 
 const findCount = (name) => {
-
-  return countFilters.value.find((btn) => btn.nameFilter === name)?.count;
+      return countFilters.value.find((btn) => btn.nameFilter === name)?.count;
 };
 
 
@@ -167,11 +167,12 @@ watch(fullFilter, (val) => {
     // прохожусь по всему списку фильтров и добавляю в массив очередностей
     for (let i = 0; i < nameFilter.value.length; i++) {
       countFilters.value.push({
-        nameFilter: nameFilter.value[i],
+        nameFilter: nameFilter.value[i].key_Cols,
         count: i + 1,
       });
       count.value++
     }
+
     ollActively.value = true;
 
   }

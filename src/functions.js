@@ -51,7 +51,7 @@ export function decrement({ arrayFilter, count }) {
 
 function changeKeyValue(sort, keyCols) {
     return sort.map(n => {
-      const find = keyCols.find(c => c.name_ua_cols === n.nameFilter)
+      const find = keyCols.find(c => c.key_Cols === n.nameFilter)
       if(find) {
         return {
           ...n,
@@ -66,6 +66,7 @@ function changeKeyValue(sort, keyCols) {
 export function sortAndFilter({ sort, dataTable, keyCols }) {
 
   const newSort = changeKeyValue(sort, keyCols)
+
   // Применение фильтрации столбцов только из newSort
   const filteredData = dataTable.map((line) => {
     const filteredLine = Object.keys(line)
@@ -76,6 +77,7 @@ export function sortAndFilter({ sort, dataTable, keyCols }) {
       }, {});
     return filteredLine;
   });
+
   // Сортировка по значениям в поле count
   return sortAfterFiltering(newSort, filteredData);
 }

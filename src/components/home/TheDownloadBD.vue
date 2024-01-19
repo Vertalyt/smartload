@@ -26,6 +26,8 @@ import RecordsPerPageSelector from '@/components/RecordsPerPageSelector.vue'
 import { ref, computed } from 'vue';
 import { useRequests } from '@/stores/requests'
 import { useAuthStore } from '@/stores/auth'
+import { useAccessColl } from '@/composables/UsersAccess'
+
 
 const emit = defineEmits({
   tableData: Object,
@@ -58,6 +60,10 @@ const addBD = async (val) => {
 }
 
 const cols_access = computed( () => authStore.getProperty('cols_access')) 
+
+
+
+
 const adTable = async (val) => {
   emit('loading', true)
   choiceTable.value = val
@@ -67,20 +73,7 @@ const adTable = async (val) => {
     sortColsAccess.unshift('id')
     let tablesColsName = await requests.requestNamesTableCol({ nameBD: choiceBD.value, nameTableBD: val});
 
-
-
-
-    const t_access =  authStore.getProperty('cols_access')
-
-    tablesColsName = tablesColsName.map( c => {
-      const findAccess = t_access.find(a => a.bd_name === c.BD_name && a.table_name === c.table_name && a.cols_name === c.key_Cols)
-        if(findAccess) {
-          return c
-        } else {
-          return undefined
-        }
-    } ).filter(r => r !== undefined)
-
+    tablesColsName = useAccessColl(tablesColsName)
     // сортировка по разрешенным правам доступа.
     const tablesData = await requests.requestTableFilterCols({ nameBD: choiceBD.value, nameTableBD: val, columns: sortColsAccess});
 

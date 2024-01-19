@@ -6,29 +6,15 @@
     :class="isId(key)"
   >
     <div class="flex items-center justify-between gap-2">
-      <button
-        v-if="thead && col === 'id'"
-        class="focus-visible:none w-[1px]"
-        aria-label="one"
-        id="sendRef"
-      >
-      </button>
-
-
       <EditButtonBlock 
         :nameLine="key"
-        :thead="thead"
         :lineId="line.id"
         :isTurnEl="isTurnEl"
         @edit="$emit('edit', $event)"
         @del="$emit('del', $event)"
         />
 
-
       <span class="px-3 text-center">{{ col }}</span> 
-
-     
-
 
     </div>
   </th>
@@ -44,10 +30,6 @@ defineEmits({
   del: String
 });
 defineProps({
-  thead: {
-    required: false,
-    type: Boolean,
-  },
   line: {
     required: true,
     type: Object,
@@ -62,6 +44,8 @@ defineProps({
 const isId = (col) => {
   return col === "id" ? "w-[80px]" : "min-w-[20ch]";
 };
+
+
 
 </script>
 

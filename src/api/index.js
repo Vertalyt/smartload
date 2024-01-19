@@ -69,7 +69,6 @@ export async function requestDatabaseTables(nameTableBD) {
 
 // правка таблицы date должен быть массивом при добавлении записей
 export async function editTable({ nameBD, nameTableBD, date, type }) {
-  console.log({ nameBD, nameTableBD, date, type });
   const urlVariable =  { 
      edit : import.meta.env.VITE_URL_Edit_record,
      add : import.meta.env.VITE_URL_Tables_ADD_Record,
