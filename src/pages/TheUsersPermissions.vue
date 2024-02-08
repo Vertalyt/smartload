@@ -34,7 +34,7 @@
 import { onMounted, ref, computed } from "vue";
 import { useRequests } from "@/stores/requests";
 import { useAuthStore } from "@/stores/auth";
-import { USERS, GROUPS_PARAM } from "@/constants";
+import { TABLES_USERS_BD } from "@/constants";
 import TheLoader from "@/components/TheLoader.vue";
 import TheUsersInfo from "@/components/users/TheUsersInfo.vue";
 import TheAddUser from "@/components/users/TheAddUser.vue";
@@ -42,7 +42,6 @@ import ModalWrapper from "@/components/ModalWrapper.vue";
 import EditAccessUser from "@/components/users/EditAccessUser.vue";
 import { useAddLdapParamSorts } from "@/functions";
 import { useUsersLogin } from "@/composables/UsersAccess";
-// import { useRouter } from "vue-router";
 import { useAccessPage } from '@/composables/useAccess'
 
 const requests = useRequests();
@@ -64,10 +63,10 @@ onMounted(async () => {
   isLoading.value = true;
 
   // запрашиваю список пользователей
-  usersParam.value = await requests.requestTableData(USERS);
+  usersParam.value = await requests.requestTableData(TABLES_USERS_BD.info);
 
   // запрашиваю группы доступа
-  usersGroups.value = await requests.requestTableData(GROUPS_PARAM);
+  usersGroups.value = await requests.requestTableData(TABLES_USERS_BD.groups);
 
   // проверка на root и убираю с прав рута
   const idUser = storeAuth.value.getProperty("group_id");
@@ -100,9 +99,9 @@ onMounted(async () => {
 
 
 const isEdit = (val) => {
+
   requests.requestEditTable({
-    nameBD: USERS.nameBD,
-    nameTableBD: USERS.nameTableBD,
+    nameTableBD: TABLES_USERS_BD.info,
     date: {
     "id": val.id,
     "username": val.username,
@@ -117,14 +116,14 @@ const isEdit = (val) => {
 };
 
 const addUser = async (val) => {
+
   await requests.requestEditTable({
-    nameBD: USERS.nameBD,
-    nameTableBD: USERS.nameTableBD,
+    nameTableBD: TABLES_USERS_BD.info,
     date: [val],
     type: "add",
   });
   // запрашиваю список пользователей заново, так как я не знаю айди который выдаст БД
-  usersParam.value = await requests.requestTableData(USERS);
+  usersParam.value = await requests.requestTableData(TABLES_USERS_BD.info);
 
   const { updatedOllListsUsers, updatedUsersParam } = useAddLdapParamSorts({
     usersParam,
@@ -137,8 +136,7 @@ const addUser = async (val) => {
 
 const delUser = async (id) => {
   await requests.requestDelRecordTable({
-    nameBD: USERS.nameBD,
-    nameTableBD: USERS.nameTableBD,
+    nameTableBD: TABLES_USERS_BD.info,
     IDs: [id],
   });
   // запрашиваю список пользователей заново, так как я не знаю айди который выдаст БД
@@ -171,7 +169,6 @@ const editAccess = async (val) => {
   try {
     if (val.type === "add") {
       await requests.requestEditTable({
-        nameBD: USERS.nameBD,
         nameTableBD: val.base,
         date: val.value,
         type: "add",
@@ -181,7 +178,6 @@ const editAccess = async (val) => {
     if (val.type === "del") {
       const IDs = val.value.map((r) => r.id);
       await requests.requestDelRecordTable({
-        nameBD: USERS.nameBD,
         nameTableBD: val.base,
         IDs,
       });
@@ -191,7 +187,7 @@ const editAccess = async (val) => {
     }
 
     // если ето свой пользователь, обновляю данные в сторе
-    await refreshDate(val.value[0].user_id);
+    await refreshDate(val.value[0].id);
   } catch (error) {
     /* empty */
   }

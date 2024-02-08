@@ -36,7 +36,7 @@
 import { ref, computed, watch } from "vue";
 import RecordsPerPageSelector from "../RecordsPerPageSelector.vue";
 import UserSelectedAccess from "./UserSelectedAccess.vue";
-import { useBDAccess, useItemsAccess } from '@/composables/UsersAccess'
+import { useBDAccess } from '@/composables/UsersAccess'
 
 const emit = defineEmits({
   load: String,
@@ -69,6 +69,9 @@ const BD_access = computed(() => props.bd_access);
 const table_access = computed(() => props.table_access);
 const nameCols = computed(() => props.colsName);
 
+
+
+
 const nameBD = useBDAccess(BD_access);
 
 const choiceBD = ref("Виберіть БД");
@@ -89,16 +92,16 @@ const colsSelection = async (val) => {
   cols_accessFilter.value = props.cols_access.filter(t => t.bd_name === choiceBD.value && t.table_name === val) 
   emit('load', { nameBD:choiceBD.value, nameTableBD:val })
 }
-
+const editAccessCols = ref()
 const computedOllCols = computed(() => props.ollCols )
-
   watch(nameCols, val => {
     cols_accessFilter.value = cols_accessFilter.value.map(i => {
       const find = val.find(c => c.key_Cols === i.cols_name)
       if(find) {
         return {
           ...i,
-          cols_name: find.name_ua_cols
+          cols_name: find.name_ua_cols,
+          key_Cols: find.key_Cols
         }
       } else {
         return i
@@ -106,11 +109,21 @@ const computedOllCols = computed(() => props.ollCols )
     })
   })
 
-// добавляю флаг к каждой таблицы, разрешена ли она
-const editAccessCols = useItemsAccess({
-  items: computedOllCols, 
-  itemsAccessFilter: cols_accessFilter,
-  type:'cols_name' })
+
+
+watch(computedOllCols, (val) => {
+
+  editAccessCols.value = val.map((b) => {
+          const userBD = cols_accessFilter.value.find((u) => u.key_Cols === b.key_Cols);
+          return {
+            cols_name: b.cols_name,
+            key_Cols: b.key_Cols,
+            check: Boolean(userBD),
+          };
+        });
+      }, { deep:true });
+
+
 
 </script>
 

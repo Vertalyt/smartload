@@ -78,14 +78,45 @@ const props = defineProps({
     required: true,
     type: Array,
   },
+  isDelColumn: {
+    required: true,
+    type: Boolean,
+  }
 });
 
 const emit = defineEmits({
-  sorts: Array
+  sorts: Array,
+  'reset-flag-del': null,
 })
 
 const nameFilter = computed(() => props.nameFilterCol )
+const delColumnFlagComputed = computed(() => props.isDelColumn )
+
 const storeMessage = useMessage()
+
+
+watch(nameFilter, val => {
+// при добавлении столбца, отслеживаю что бы добавить в отображение фильтра, 
+// добавляю +1 для компенсации добавления строки с id 
+  if(!delColumnFlagComputed.value) {
+    count.value++;
+    countFilters.value.push({ nameFilter: val[val.length - 1].key_Cols, count: count.value });
+  } else {
+  // отслеживаю удаление столбца
+    count.value--;
+    countFilters.value = countFilters.value.map(n => {
+
+      const find = val.find(v => v.key_Cols === n.nameFilter)
+      if(find) {
+        return n
+      }
+    }).filter(Boolean);
+
+  emit('reset-flag-del')
+  }
+
+})
+
 // выпадающий список
 const isOpenCollapsible = ref(false);
 const isShow = computed(() =>
@@ -141,18 +172,14 @@ const isActiveBtnFilter = ({ activeBtn, name }) => {
   }
 };
 
-
-
 // ищу по названию фильтра его очередность для вывода в кнопку очереди. 
 const findCount = (name) => {
       return countFilters.value.find((btn) => btn.nameFilter === name)?.count;
 };
 
-
 const fullFilter = ref(false);
 
 // наблюдаю за переменой выбора/снятия всех фильтров поиска
-
 
 watch(fullFilter, (val) => {
   if(val === null) {

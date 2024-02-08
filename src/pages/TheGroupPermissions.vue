@@ -26,10 +26,7 @@ import { onMounted, ref } from "vue";
 import { useRequests } from "@/stores/requests";
 import {
   ADD,
-  GROUPS_PARAM,
-  PERMISSIONS_PARAM,
-  GROUP_PERMISSIONS_PARAM,
-  USERS_BD,
+  TABLES_USERS_BD,
 } from "@/constants";
 import TheLoader from "@/components/TheLoader.vue";
 import RecordsPerPageSelector from "@/components/RecordsPerPageSelector.vue";
@@ -56,17 +53,15 @@ onMounted(async () => {
   isLoading.value = true;
 
   // запрашиваю список групп
-  groupList.value = await requests.requestTableData(GROUPS_PARAM);
+  groupList.value = await requests.requestTableData(TABLES_USERS_BD.groups);
 
   // убираю группу root со списка. Ее нельзя редактировать
   // groupList.value = ollGroupList.filter( g=> g.group_name !== 'root')
   // запрашиваю все разрешения
-  allPermissions.value = await requests.requestTableData(PERMISSIONS_PARAM);
+  allPermissions.value = await requests.requestTableData(TABLES_USERS_BD.permissions);
 
   //запрашиваю веcь список разрешений для всех групп
-  groups_permissions.value = await requests.requestTableData(
-    GROUP_PERMISSIONS_PARAM,
-  );
+  groups_permissions.value = await requests.requestTableData(TABLES_USERS_BD.g_permissions);
 
   // отсортировую только имена для селекта
   groupList.value.forEach((g) => {
@@ -134,8 +129,7 @@ const editGroupPermission = async (val) => {
       try {
         // добавляю запись 
         await requests.requestEditTable({
-            nameBD: USERS_BD,
-            nameTableBD: GROUP_PERMISSIONS_PARAM.nameTableBD,
+            nameTableBD: TABLES_USERS_BD.g_permissions,
             date: edit,
             type : 'edit'
           })

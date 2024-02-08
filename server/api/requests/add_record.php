@@ -12,14 +12,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Логирование запроса и данных
     $logFilePath = 'C:\\Work\\error_log.txt';
     error_log("Запрос: " . file_get_contents('php://input') . PHP_EOL, 3, $logFilePath);
+    $database = "Smart_load";
 
     try {
         // Получение данных из потока ввода
         $postData = json_decode(file_get_contents('php://input'), true);
 
         // Проверка наличия необходимых ключей
-        if (isset($postData['nameBD'], $postData['nameTableBD'], $postData['date'])) {
-            $database = $postData['nameBD'];
+        if (isset($postData['nameTableBD'], $postData['date'])) {
             $tableName = $postData['nameTableBD'];
         
             // Валидация и санитизация пользовательского ввода при необходимости

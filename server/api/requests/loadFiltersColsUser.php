@@ -7,8 +7,9 @@ require_once('../auth/cors.php');
 require_once('../auth/config.php');
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    $database = "Smart_load";
     try {
-        $database = $_GET['nameBD'];
+
         $tableName = $_GET['nameTableBD'];
 
         // Валидация и санитизация пользовательского ввода при необходимости

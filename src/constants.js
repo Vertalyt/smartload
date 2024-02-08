@@ -1,5 +1,6 @@
 
 export const allowed_group = { 'group': [1, 2], 'users': [1, 2] };
+export const allowed_group_editor = { 'group': [...allowed_group.group, 3], 'users': [...allowed_group.users, 3] };
 
 export const COLOR_VARIABLE_BTN =  { 
       blue: 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500',
@@ -23,36 +24,13 @@ export const EDIT = 'Редагувати'
 
 export const TABLES_USERS_BD = {
   info : 'user_info',
-  u_access: 'user_access',
   t_access : 'table_access',
   permissions : 'permissions',
   groups : 'groups',
   g_permissions : 'group_permissions',
-  c_filter : 'column_filter',
   db_access : 'data_base_acces',
   c_access: 'cols_access'
 }
-
-export const GROUPS_PARAM = {
-  nameBD: USERS_BD,
-  nameTableBD: TABLES_USERS_BD.groups,
-};
-
-export const PERMISSIONS_PARAM = {
-  nameBD: USERS_BD,
-  nameTableBD: TABLES_USERS_BD.permissions,
-};
-
-export const GROUP_PERMISSIONS_PARAM = {
-  nameBD: USERS_BD,
-  nameTableBD: TABLES_USERS_BD.g_permissions,
-};
-
-
-export const USERS = {
-  nameBD: USERS_BD,
-  nameTableBD: TABLES_USERS_BD.info,
-};
 
 
 export const MENUDATE = [

@@ -76,14 +76,22 @@ const cols_access = ref()
 // гружу разрешения пользователя на БД и таблицы. Составляю список БД
 onMounted( async () => {
   users_access.value = await requests.requestUserData(props.info.id);
-  bd_lists.value = await requests.requestTableData({
-    nameBD: "BD_lists",
-    nameTableBD: "BD_lists",
-  });
+  const ollBD = await requests.requestTableData("BD_lists");
+
+    // Создаем объект Set для уникальных значений bd_name
+const uniqueBdNames = new Set(ollBD.map(item => item.bd_name));
+
+// Преобразуем Set обратно в массив и сортируем
+bd_lists.value = Array.from(uniqueBdNames)
+  .map(bdName => ollBD.find(item => item.bd_name === bdName))
+  .sort((a, b) => a.bd_name.localeCompare(b.bd_name));
+
 
     bd_access.value = users_access.value.userBD;
+
     table_access.value = users_access.value.t_access;
     cols_access.value =  users_access.value.c_access;
+
     tableFocus("#editAccess")
 } )
 
@@ -96,7 +104,8 @@ const loadBDTable = async(val) => {
   nameBD.value = val
   isLoading.value = true;
   try {
-    ollTablesWithBD.value = await requests.requestDatabaseTablesData(val);
+    const ollBD_Table = await requests.requestDatabaseTablesData();
+    ollTablesWithBD.value = ollBD_Table.filter(r => r.bd_name === val).map(t => t.table_name)
     isLoading.value = false;
   } catch (error) {
     isLoading.value = false;
@@ -106,8 +115,10 @@ const loadBDTable = async(val) => {
 // ищу/сортирую массив для оставления только елементов для удаления
 function findDelAccess({userParamAccess, newAccess, type}) {
  return userParamAccess.filter(b => {
-  const access = newAccess.find(a => a === b[type])
+  if(b.cols_name !== 'id') {
+    const access = newAccess.find(a => a === b[type])
   return !access ? b : undefined;
+  }
   })
 }
 // ищу/сортирую массив для оставления только елементов для добавления
@@ -164,7 +175,7 @@ const editAccessTable = (val) => {
 
 const editAccessCols = (val) => {
    const newVal =  translateColsPermission({date: val, colsName:tablesColsName.value, translation: false})
-  const filterTable = cols_access.value.filter( t => t.bd_name === nameBDCols.value && t.table_name === nameTable.value)
+   const filterTable = cols_access.value.filter( t => t.bd_name === nameBDCols.value && t.table_name === nameTable.value)
 
   let addAccess = findAddAccess({userParamAccess:filterTable, newAccess:newVal, type: 'cols_name' })
   if (addAccess.length) {
@@ -176,13 +187,14 @@ const editAccessCols = (val) => {
     }
   })
      //   отправляю запрос на добавление права
+
      emit('edit', { value: addAccess, type: 'add', base: TABLES_USERS_BD.c_access, load: true })
   }
 
   const delAccessTable = findDelAccess({userParamAccess:filterTable, newAccess:newVal, type: 'cols_name' })
     // отправляю запрос на удаление права
   if(delAccessTable.length) {
-    emit('edit', { value: delAccessTable, type: 'del', base: TABLES_USERS_BD.c_access, load: true })
+     emit('edit', { value: delAccessTable, type: 'del', base: TABLES_USERS_BD.c_access, load: true })
   }
 
 }
@@ -200,9 +212,25 @@ const loadOllCols = async ({ nameBD, nameTableBD }) => {
   // запрашиваю переводы названия столбцов
   tablesColsName.value = await requests.requestNamesTableCol({ nameBD, nameTableBD});
   const date = await requests.requestColsUser(nameBD, nameTableBD)
-
   // изменяю названия столбцов с английского на украинский
-  ollCols.value = translateColsPermission({date, colsName:tablesColsName.value, translation: true})
+
+  ollCols.value = tablesColsName.value.map(t => {
+        const translation = date.find(c => c === t.key_Cols);
+      if (translation) {
+          return {
+            cols_name: t.name_ua_cols,
+            key_Cols : t.key_Cols,
+          }
+      } else {
+        return {
+          cols_name: t.key_Cols,
+          key_Cols: t.key_Cols
+          }
+      }
+      })
+
+
+
 }
 
 </script>

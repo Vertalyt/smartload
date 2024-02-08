@@ -4,6 +4,12 @@
     @click.stop="isClose"
     @keyup.esc="isClose"
   >
+  <div class="flex justify-end cursor-pointer mb-4"
+  @click.stop="isClose"
+  >
+    <CloseSVG class="w-8 h-8 text-gray-400 hover:text-gray-300" />
+    
+  </div>
     <div>
       <slot />
     </div>
@@ -12,6 +18,7 @@
 
 
 <script setup>
+import CloseSVG from '@/assets/img/svg/CloseSVG.vue'
 const emit = defineEmits({
   close: null
 });

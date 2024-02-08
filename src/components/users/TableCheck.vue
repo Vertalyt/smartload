@@ -22,10 +22,10 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import RecordsPerPageSelector from "../RecordsPerPageSelector.vue";
 import UserSelectedAccess from "./UserSelectedAccess.vue";
-import { useBDAccess, useItemsAccess } from '@/composables/UsersAccess'
+import { useBDAccess } from '@/composables/UsersAccess'
 
 
 const emit = defineEmits({
@@ -61,14 +61,17 @@ const computedOllTablesName = computed(() => props.ollTablesName);
 const computedTableAccess = computed(() => props.table_access)
 
 
+const editAccessTable = ref()
 
-
-// добавляю флаг к каждой таблицы, разрешена ли она
-const editAccessTable = useItemsAccess({
-  items: computedOllTablesName, 
-  itemsAccessFilter: computedTableAccess,
-  type: 'table_name'
-})
+watch([computedOllTablesName, computedTableAccess], (val) => {
+  editAccessTable.value = val[0].map((b) => {
+          const userBD = val[1].find((u) => u.table_name === b);
+          return {
+            table_name: b,
+            check: Boolean(userBD),
+          };
+        });
+      }, { deep:true });
 
 
 </script>

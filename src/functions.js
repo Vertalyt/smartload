@@ -19,36 +19,6 @@ export function decrement({ arrayFilter, count }) {
 }
 
 
-
-
-// {
-//   "ID": "1",
-//   "BD_name": "ContragentDataDB",
-//   "table_name": "WFCompany",
-//   "key_Cols": "CompanyName",
-//   "name_ua_cols": "Имя компанії"
-// },
-// {
-//   "ID": "2",
-//   "BD_name": "ContragentDataDB",
-//   "table_name": "WFCompany",
-//   "key_Cols": "Address",
-//   "name_ua_cols": "Адреса"
-// },
-
-
-// [
-//   {
-//       "nameFilter": "id",
-//       "count": 0
-//   },
-//   {
-//       "nameFilter": "Имя компанії",
-//       "count": 1
-//   },
-// ]
-
-
 function changeKeyValue(sort, keyCols) {
     return sort.map(n => {
       const find = keyCols.find(c => c.key_Cols === n.nameFilter)
@@ -330,7 +300,7 @@ export function translit(str) {
   }
 
   const ru = "А-а-Б-б-В-в-Ґ-ґ-Г-г-Д-д-Е-е-Ё-ё-Є-є-Ж-ж-З-з-И-и-І-і-Ї-ї-Й-й-К-к-Л-л-М-м-Н-н-О-о-П-п-Р-р-С-с-Т-т-У-у-Ф-ф-Х-х-Ц-ц-Ч-ч-Ш-ш-Щ-щ-Ъ-ъ-Ы-ы-Ь-ь-Э-э-Ю-ю-Я-я".split("-");
-  const en = "A-a-B-b-V-v-G-g-G-g-D-d-E-e-E-e-E-e-ZH-zh-Z-z-I-i-I-i-I-i-J-j-K-k-L-l-M-m-N-n-O-o-P-p-R-r-S-s-T-t-U-u-F-f-H-h-TS-ts-CH-ch-SH-sh-SCH-sch-'-'-Y-y-'-'-E-e-YU-yu-YA-ya".split("-");
+  const en = "A-a-B-b-V-v-G-g-G-g-D-d-E-e-E-e-E-e-ZH-zh-Z-z-I-i-I-i-I-i-J-j-K-k-L-l-M-m-N-n-O-o-P-p-R-r-S-s-T-t-U-u-F-f-H-h-TS-ts-CH-ch-SH-sh-SCH-sch-_-_-Y-y-_-_-E-e-YU-yu-YA-ya".split("-");
   let res = '';
 
   for (let i = 0, l = str.length; i < l; i++) {
@@ -352,29 +322,13 @@ export function translit(str) {
 
 
 
-export function translateCols({date, colsName, translation}) {
-  let translationCompare
-  let translationKey
-  if(translation) {
-    translationCompare = 'key_Cols';
-    translationKey = 'name_ua_cols';
-  } else {
-    translationCompare = 'name_ua_cols';
-    translationKey = 'key_Cols';
-  }
- return date.map(p => {
-    Object.keys(p).forEach(key => {
-      const translation = colsName.find(c => c[translationCompare] === key);
-      if (translation) {
-        // If there is a match, update the property name
-        p[translation[translationKey]] = p[key];
-        delete p[key]; // Remove the old property name
-      }
-    });
-    return p;
-  });
-
+export function translateCols(date) {
+  return date.reduce((acc, p) => {
+    acc[p.key_Cols] = p.val;
+    return acc;
+  }, {});
 }
+
 
 
 export function translateColsPermission({date, colsName, translation}) {
@@ -398,4 +352,14 @@ const newName = []
       }
   });
   return newName
+}
+
+
+
+// Функция для исключения ключа из каждого объекта
+export function excludeKeyFromArray(arr, key) {
+  return arr.map(obj => {
+    delete obj[key];
+    return obj
+  });
 }

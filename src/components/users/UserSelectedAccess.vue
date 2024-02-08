@@ -18,7 +18,7 @@
               class="inline-block pl-[0.15rem] hover:cursor-pointer"
               for="checkboxDefault"
             >
-                <span>{{ b[nameParam] }}</span>
+                <span>{{ b[nameParam].cols_name || b[nameParam] }}</span>
             </label>
         </div>
 
@@ -81,9 +81,8 @@ const access = ref(itemAccessComputed.value)
 watch(itemAccessComputed, val => {
   access.value = val
 }  )
-
 const selectedDatabases = () => {
-  const editAccessBD = access.value.filter(database => database.check).map(database => database[props.nameParam]);
+  const editAccessBD = access.value.filter(database => database.check).map(database => database.key_Cols || database[props.nameParam]);
   emit('edit', editAccessBD)
 };
 

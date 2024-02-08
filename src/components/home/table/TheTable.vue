@@ -9,6 +9,7 @@
         <LoadTableDataVue @load="downloadTable" />
 
         <TurnOnEditElements
+          :resetValue="resetValue"
           @column="$emit('column', $event)"
           @turn="isTurnElActive"
         />
@@ -47,7 +48,11 @@
         <thead
           class="top-0 bg-gray-50 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-400"
         >
-          <TableLineNameCols :line="variableNames" /> 
+          <TableLineNameCols 
+          :line="variableNames"
+          :isTurnEl="isTurnEl"
+          @delColumn="$emit('delColumn', $event, isTurnEl = 'empty')"
+           /> 
         </thead>
 
         <tbody>
@@ -59,8 +64,8 @@
             <TableLine
               :line="line"
               :isTurnEl="isTurnEl"
-              @edit="$emit('edit', $event)"
-              @del="$emit('del', $event)"
+              @edit="$emit('edit', $event, isTurnEl = 'empty')"
+              @del="$emit('del', $event, isTurnEl = 'empty')"
             />
           </tr>
         </tbody>
@@ -107,6 +112,7 @@ defineEmits({
   add: Object,
   del: String,
   column: Object,
+  delColumn:String,
 });
 const props = defineProps({
   dataTable: {
@@ -133,9 +139,8 @@ const dateComputed = computed(() => props.dataTable);
 // сами названия переменных
 const variableNameCols = computed(() => props.nameCols);
 const variableNames = ref()
-
 function addId(val) {
-  const isIdf = val.find(c => c.nameCols === 'id')
+  const isIdf = val.find(c => c.name_ua_cols === 'id' || c.key_Cols === 'id')
   if(isIdf) {
     return val
   } else {
@@ -256,12 +261,21 @@ const isResets = () => {
   filterSearch.value = null;
 };
 
-const isTurnEl = ref("");
+const isTurnEl = ref('empty');
 
 const isTurnElActive = (val) => {
   isTurnEl.value = val;
   tableFocus("#sendRef");
 };
+
+const resetValue = ref(false)
+watch(isTurnEl, val => {
+  if(val === 'empty') {
+    resetValue.value = true
+  } else {
+    resetValue.value = false
+  }
+})
 
 const table = ref();
 let styleFileName
@@ -272,16 +286,33 @@ if(import.meta.env.VITE_STYLE_FILE_NAME) {
 }
 
 
+function nameTables(date, names) {
+  return date.map(item => {
+  return Object.keys(item).reduce((acc, key) => {
+    const find = names.find(v => v.key_Cols === key);
+    if (find) {
+      acc[find.name_ua_cols] = item[key];
+    } else {
+      acc[key] = item[key];
+    }
+    return acc;
+  }, {});
+});
+}
+
 const downloadTable = async (val) => {
+
+  const nameKeys = nameTables(dateComputed.value, variableNames.value)
+
   if (val === "csv") {
     loadCSV({
-      data: dateComputed.value,
+      data: nameKeys,
       nameBook: props.namesBD,
       nameList: props.namesTableBD,
     });
   } else if (val === "xls") {
     await loadXLS({
-      data: dateComputed.value,
+      data: nameKeys,
       nameBook: props.namesBD,
       nameList: props.namesTableBD,
     });

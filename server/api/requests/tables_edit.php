@@ -5,26 +5,37 @@ require_once('../auth/cors.php');
 
 // Подключение конфигурации
 require_once('../auth/config.php');
+require_once('checkAccess.php');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Логирование запроса и данных
     $logFilePath = 'C:\\Work\\error_log.txt';
     error_log("Request: " . file_get_contents('php://input'), 3, $logFilePath);
-
+    $database = "Smart_load";
     try {
         // Получение данных из потока ввода
         $postData = json_decode(file_get_contents('php://input'), true);
 
         // Проверка наличия необходимых ключей
-        if (isset($postData['nameBD'], $postData['nameTableBD'], $postData['date'])) {
-            $database = $postData['nameBD'];
+        if (isset($postData['nameTableBD'], $postData['date'], $postData['searchUsername'])) {
             $tableName = $postData['nameTableBD'];
             $date = $postData['date'];
-
+            $searchUsername = $postData['searchUsername'];
             // Валидация и санитизация пользовательского ввода при необходимости
 
             $conn = new PDO("sqlsrv:Server=$server;Database=$database;Encrypt=false", $username, $password);
             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+            // Выполнение функции для проверки доступа пользователя
+            $userInfo = getUserInfo($searchUsername);
+            
+            // Проверяем, получены ли данные пользователя
+            if (isset($userInfo['error'])) {
+                echo json_encode($userInfo); // Отправляем ошибку на фронтенд
+                return; // Завершаем выполнение скрипта
+            }
+
+            // Если запрос прошел успешно, продолжаем выполнение кода
 
             // Получаем id из данных
             $IDLine = $date['id']; // Предполагается, что 'id' - это ключ в ваших данных

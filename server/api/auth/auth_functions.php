@@ -25,10 +25,10 @@ function authenticateUser($ad_user, $ad_password) {
 
                     $xatanet_catalog = "OU=XataNet,DC=xatanet,DC=ua";
                     $servers_admins_catalog = "OU=Server's & Admin's,DC=xatanet,DC=ua";
-                    $common_catalog = "DC=xatanet,DC=ua";
 
-                    $search_filter = "(sAMAccountName=$username)";
-                    $attributes = array("displayname", "mail", "samaccountname");
+                     $search_filter = "(sAMAccountName=$username)";
+                    
+                    $attributes = array("displayname", "mail", "samaccountname", "telephonenumber", "homephone", "mobile");
 
                     // Ищем в каталоге XataNet
                     $result = ldap_search($ldap_conn, $xatanet_catalog, $search_filter, $attributes);
@@ -40,11 +40,6 @@ function authenticateUser($ad_user, $ad_password) {
                         $entry = ldap_get_entries($ldap_conn, $result);
                     }
 
-                    if ($entry['count'] === 0) {
-                        // Если пользователь не найден во втором каталоге, ищем в общем каталоге xatanet
-                        $result = ldap_search($ldap_conn, $common_catalog, $search_filter, $attributes);
-                        $entry = ldap_get_entries($ldap_conn, $result);
-                    }
 
                     ldap_unbind($ldap_conn);
                     return $entry;
@@ -58,4 +53,5 @@ function authenticateUser($ad_user, $ad_password) {
 
     return false;
 }
+
 ?>

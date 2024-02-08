@@ -16,9 +16,9 @@ export function useBDAccess(BD_access) {
 
   export function useItemsAccess({items, itemsAccessFilter, type, immediate = false}) {
     const result = ref() 
-    watch(items, (val) => {
-        result.value = val.map((b) => {
-          const userBD = itemsAccessFilter.value.find((u) => u[type] === b);
+    watch([items, itemsAccessFilter], (val) => {
+        result.value = val[0].map((b) => {
+          const userBD = val[1].find((u) => u[type] === b);
           return {
             [type]: b,
             check: Boolean(userBD),
@@ -55,7 +55,7 @@ export function useBDAccess(BD_access) {
     const t_access = authStore.getProperty('cols_access')
 
    return tablesColsName.map( c => {
-      const findAccess = t_access.find(a => a.bd_name === c.BD_name && a.table_name === c.table_name && a.cols_name === c.key_Cols)
+      const findAccess = t_access.find(a => a.bd_name === c.bd_name && a.table_name === c.table_name && a.cols_name === c.key_Cols)
         if(findAccess) {
           return c
         } else {

@@ -5,8 +5,7 @@ require_once('config.php');
 
 function getUserInfo($searchUsername) {
     global $server, $username, $password;
-    $database = "Users";
-
+    $database = "Smart_load";
     try {
         $conn = new PDO("sqlsrv:Server=$server;Database=$database;Encrypt=false", $username, $password);
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

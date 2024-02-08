@@ -137,7 +137,6 @@ const delUser = (id) => {
 
 
 const changeActive = ({ user, change }) => {
-
 const userEdit = user;
 const active = statusChange(change)
 userEdit.active_status = active;

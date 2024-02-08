@@ -6,13 +6,8 @@ require_once('../auth/cors.php');
 require_once('../auth/config.php');
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    $logFilePath = 'C:\\Work\\error_log.txt';
-    error_log("Request: " . file_get_contents('php://input'), 3, $logFilePath);
-
+    $database = "Smart_load";
     try {
-        // Принимаем параметр database из запроса
-        $database = $_GET['nameBD'];
-
         $conn = new PDO("sqlsrv:Server=$server;Database=$database;Encrypt=false", $username, $password);
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 

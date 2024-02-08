@@ -31,6 +31,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($entry = authenticateUser($ad_user, $ad_password)) {
             header('Content-Type: application/json');
 
+            $logFilePath = 'C:\\Work\\error_log.txt';
+            error_log("LDAP Entry: " . print_r($entry, true) . PHP_EOL, 3, $logFilePath);
+
             // Получаем значения samaccountname и mail
             $samaccountname = isset($entry[0]['samaccountname'][0]) ? $entry[0]['samaccountname'][0] : null;
             $mail = isset($entry[0]['mail'][0]) ? $entry[0]['mail'][0] : null;

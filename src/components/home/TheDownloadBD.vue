@@ -71,14 +71,20 @@ const adTable = async (val) => {
   const sortColsAccess = cols_access.value.filter(c => c.bd_name === choiceBD.value && c.table_name === val).map(c => c.cols_name)
   if(sortColsAccess.length > 0) {
     sortColsAccess.unshift('id')
-    let tablesColsName = await requests.requestNamesTableCol({ nameBD: choiceBD.value, nameTableBD: val});
 
-    tablesColsName = useAccessColl(tablesColsName)
-    // сортировка по разрешенным правам доступа.
-    const tablesData = await requests.requestTableFilterCols({ nameBD: choiceBD.value, nameTableBD: val, columns: sortColsAccess});
+     let tablesColsName = await requests.requestNamesTableCol({ nameBD: choiceBD.value, nameTableBD: val});
 
-    if(tablesData ) {
-    emit('tableData', {colsName:tablesColsName, tablesData, nameBD: choiceBD.value, nameTableBD: val})
+     tablesColsName = useAccessColl(tablesColsName)
+    // загрузка и сортировка по разрешенным правам доступа.
+     const tablesData = await requests.requestTableFilterCols({ nameBD: choiceBD.value, nameTableBD: val, columns: sortColsAccess});
+
+    if(tablesData) {
+      if(tablesData.error) {
+        console.log(tablesData.error);
+      } else {
+        emit('tableData', {colsName:tablesColsName, tablesData, nameBD: choiceBD.value, nameTableBD: val})
+      }
+
     }
   }  
 

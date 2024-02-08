@@ -16,9 +16,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $postData = json_decode(file_get_contents('php://input'), true);
 
         // Проверка наличия необходимых ключей
-        if (isset($postData['nameTableBD'], $postData['IDs'])) {
-            $tableName = $postData['nameTableBD'];
-            $IDsToDelete = $postData['IDs'];
+        if (isset($postData['nameTableBD'], $postData['criteria'])) {
+            $nameTableBD = $postData['nameTableBD'];
+            $criteria = $postData['criteria'];
 
             // Валидация и санитизация пользовательского ввода при необходимости
 
@@ -26,13 +26,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
             // Подготовка и выполнение SQL-запроса на удаление записей
-            $placeholders = implode(',', array_fill(0, count($IDsToDelete), '?'));
-            $sql = "DELETE FROM $tableName WHERE id IN ($placeholders)";
+            $sql = "DELETE FROM $nameTableBD WHERE ";
+            $whereClauses = [];
+            $params = [];
+
+            foreach ($criteria as $columnName => $columnValue) {
+                $whereClauses[] = "$columnName = ?";
+                $params[] = $columnValue;
+            }
+
+            $sql .= implode(" AND ", $whereClauses);
+
             $stmt = $conn->prepare($sql);
 
-            // Привязываем параметры
-            foreach ($IDsToDelete as $index => $id) {
-                $stmt->bindValue(($index + 1), $id, PDO::PARAM_INT);
+            foreach ($params as $index => $param) {
+                $stmt->bindValue(($index + 1), $param, is_int($param) ? PDO::PARAM_INT : PDO::PARAM_STR);
             }
 
             $stmt->execute();
