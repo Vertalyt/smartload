@@ -12,7 +12,8 @@ export const useAuthStore = defineStore("auth", {
     group_id: null,
     BD_access: null,
     table_access: null,
-    cols_access: null
+    cols_access: null,
+    active_status: null
   }),
   getters: {
     isAuthenticated(getters) {
@@ -90,15 +91,17 @@ export const useAuthStore = defineStore("auth", {
       this.group_id = null;
       this.BD_access = null,
       this.table_access = null,
-      this.cols_access = null
+      this.cols_access = null,
+      this.active_status = null,
       localStorage.removeItem(TOKEN_KEY);
     },
-    userInfo({id, group_id, BD_access, table_access, cols_access }) {
+    userInfo({id, group_id, BD_access, table_access, cols_access, active_status }) {
       this.id = id;
       this.group_id = group_id;
       this.BD_access = BD_access,
       this.table_access = table_access,
-      this.cols_access = cols_access
+      this.cols_access = cols_access,
+      this.active_status = active_status
     },
     addCols_Access({bd_name, table_name, cols_name}) {
       this.cols_access = [...this.cols_access, {

@@ -5,8 +5,18 @@
     >
 
 
-      <div class="flex gap-5">
-        <LoadTableDataVue @load="downloadTable" />
+      <div class="flex items-center gap-5">
+
+        <TheTooltip 
+    content="Завантажити"
+    :isSHow="isSHowLoading"
+    >
+    <LoadTableDataVue 
+    @mouseover="isSHowLoading = true"
+    @mouseleave="isSHowLoading = false"
+    @load="downloadTable" />
+  </TheTooltip>
+
 
         <TurnOnEditElements
           :resetValue="resetValue"
@@ -27,7 +37,7 @@
       <TheSearchTable
         @search="isSearch"
         @resets="isResets"
-        :reset="resetSearch"
+        :reset="resetGlobalSearch"
       />
 
       <RecordsPerPageSelector
@@ -46,12 +56,14 @@
         class="relative w-full text-left text-sm text-gray-500 rtl:text-right dark:text-gray-400"
       >
         <thead
-          class="top-0 bg-gray-50 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-400"
+          class="top-0 bg-blue-400 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-400"
         >
           <TableLineNameCols 
           :line="variableNames"
           :isTurnEl="isTurnEl"
           @delColumn="$emit('delColumn', $event, isTurnEl = 'empty')"
+          @searchId="searchById"
+          :resetSearch="resetIdSearch"
            /> 
         </thead>
 
@@ -59,7 +71,7 @@
           <tr
             v-for="line in resultArrDate"
             :key="line.id"
-            class="border-b bg-white dark:border-gray-700 dark:bg-gray-800"
+            class="border-b bg-blue-200 dark:border-gray-700 dark:bg-gray-800"
           >
             <TableLine
               :line="line"
@@ -106,6 +118,8 @@ import SubmitButton from "@/components/SubmitButton.vue";
 import TurnOnEditElements from "@/components/home/table/TurnOnEditElements.vue";
 import LoadTableDataVue from "./LoadTableData.vue";
 import TableLineNameCols from '@/components/home/table/TableLineNameCols.vue'
+import TheTooltip from "@/components/TheTooltip.vue";
+
 
 defineEmits({
   edit: String,
@@ -163,7 +177,7 @@ onMounted(() => {
 
 const filterSearch = ref();
 // пагинация
-const countElements = ref(dateComputed.value.length - 1);
+const countElements = ref(dateComputed.value.length);
 const isSelected = ref(10);
 const currentPage = ref(1);
 
@@ -204,19 +218,36 @@ const saveFilterSearch = ref(null);
 
 // фильтр
 const isSearch = (search) => {
+  resetGlobalSearch.value = false
   if (saveFilterSearch.value === null) {
     currentPage.value = 1;
   }
   saveFilterSearch.value = search;
   filterSearch.value = sortSearch({ search, arr: dateComputed.value });
   tableFocus("#sendRef");
+  resetIdSearch.value = true
 };
 
-// сброс фильтра поиска
-const resetSearch = ref(false);
+// сброс фильтра поиска по айди
+const resetIdSearch = ref(false)
 
-watch(
-  dateComputed,
+//поиск по айди
+const searchById = (val) => {
+  resetIdSearch.value = false;
+
+  if(val === '') {
+    filterSearch.value = null
+  } else {
+    filterSearch.value = dateComputed.value.filter(l => Number(l.id) === Number(val))
+    resetGlobalSearch.value = true
+  }
+
+}
+
+// сброс фильтра глобального поиска поиска
+const resetGlobalSearch = ref(false);
+
+watch(  dateComputed,
   (val) => {
     if (saveFilterSearch.value) {
       const sort = sortSearch({ search: saveFilterSearch.value, arr: val });
@@ -224,23 +255,22 @@ watch(
       // если после правок, массив пустой, возвращаю базовый, чищу массивы фильтра
       if (sort.length === 0) {
         filterSearch.value = null;
-        resetSearch.value = true;
+        resetGlobalSearch.value = true;
         saveFilterSearch.value = null;
       } else {
         filterSearch.value = sort;
       }
     }
 
-    countElements.value = dateComputed.value.length - 1;
+    countElements.value = dateComputed.value.length;
   },
   { deep: true },
 );
 
-watch(
-  filterSearch,
+watch(  filterSearch,
   (val) => {
     if (val) {
-      countElements.value = filterSearch.value.length - 1;
+      countElements.value = filterSearch.value.length;
       resultArrDate.value = val.slice(start.value, end.value);
       // подсчитываю нет ли пустой последней страницы после редактирования
       const endPage = countElements.value / isSelected.value;
@@ -248,7 +278,7 @@ watch(
         currentPage.value = Math.ceil(endPage);
       }
     } else {
-      countElements.value = dateComputed.value.length - 1;
+      countElements.value = dateComputed.value.length;
       resultArrDate.value = dateComputed.value.slice(start.value, end.value);
     }
   },
@@ -257,7 +287,7 @@ watch(
 
 const isResets = () => {
   currentPage.value = 1;
-  countElements.value = dateComputed.value.length - 1;
+  countElements.value = dateComputed.value.length;
   filterSearch.value = null;
 };
 
@@ -300,6 +330,8 @@ function nameTables(date, names) {
 });
 }
 
+
+const isSHowLoading = ref(false)
 const downloadTable = async (val) => {
 
   const nameKeys = nameTables(dateComputed.value, variableNames.value)
@@ -336,6 +368,8 @@ const downloadTable = async (val) => {
 `)
   }
 };
+
+
 
 
 </script>

@@ -209,6 +209,7 @@ export const useRequests = defineStore("requests", {
             BD_access: bd_name,
             table_access: t_access,
             cols_access: c_access,
+            active_status: userInfo[0].active_status,
           });
         }
       } catch (e) {

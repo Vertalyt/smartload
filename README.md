@@ -1,35 +1,18 @@
-# SmartLoad
+Приложение которое авторизирует пользователя через LDAP сервер,
+после предоставляет ему доступ в зависимости от группы пользователя
 
-This template should help get you started developing with Vue 3 in Vite.
+Читатель: к выбору доступных, согласно его прав доступ к БД, разрешенным таблицам/ разрешенным столбцам. Просмотр и скачка таблицы
+Редактор: права читателя + редактирование строк, добавление новых строк, добавление столбцов.
 
-## Recommended IDE Setup
+Администратор: права читателя + редактора. 
+А также дополнительная страницы где он может:
+Раздать права каждому пользователю.
+Создать/удалить нового пользователя.
+Настроить права групп.
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur) + [TypeScript Vue Plugin (Volar)](https://marketplace.visualstudio.com/items?itemName=Vue.vscode-typescript-vue-plugin).
+Root: все права Администратора + создание Администраторов
 
-## Customize configuration
 
-See [Vite Configuration Reference](https://vitejs.dev/config/).
+На гитхаб удалены все серверные ключи доступа
 
-## Project Setup
-
-```sh
-npm install
-```
-
-### Compile and Hot-Reload for Development
-
-```sh
-npm run dev
-```
-
-### Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
-```
+Скриншоты в папке src/slide/

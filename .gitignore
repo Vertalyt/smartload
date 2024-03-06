@@ -13,9 +13,13 @@ dist
 dist-ssr
 coverage
 *.local
+note.txt
+
 
 /cypress/videos/
 /cypress/screenshots/
+/server/key/
+/server/sert/
 
 # Editor directories and files
 .vscode/*

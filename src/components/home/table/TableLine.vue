@@ -2,7 +2,7 @@
   <th
     v-for="(col, key, index) in line"
     :key="col + index + key"
-    class="py-3 border border-gray-500 max-w-48 relative"
+    class="py-3 border border-gray-500 relative"
     :class="isId(key)"
   >
     <div class="flex items-center justify-between gap-2">

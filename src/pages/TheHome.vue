@@ -11,7 +11,8 @@
     />
   </ModalWrapper>
 
-  <TheLabelHome
+  <TheLabelLoadingDate
+    v-if="Number(active_status) === 1"
     @tableData="tableData"
     @loading="handleLoadingEvent"
     @forbidden="forbidden"
@@ -29,9 +30,15 @@
   />
 
   <span
-    v-if="generationLineFilters.length === 0"
+    v-if="generationLineFilters.length === 0 && Number(active_status) !== 0"
     class="text-md flex items-center justify-center lg:text-2xl"
     >Виберіть базу даних та фільтри для завантаження.</span
+  >
+
+  <span
+    v-if="Number(active_status) === 0"
+    class="text-md flex items-center justify-center lg:text-2xl"
+    >Ваш користувач не активний. Звернітся до адміністратора.</span
   >
 
   <TheTable
@@ -49,7 +56,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import TheCollapsibleFilter from "@/components/home/TheCollapsibleFilter.vue";
 import TheTable from "@/components/home/table/TheTable.vue";
 import {
@@ -63,14 +70,25 @@ import {
 import TheLoader from "@/components/TheLoader.vue";
 import ModalWrapper from "@/components/ModalWrapper.vue";
 import TheTableLineEdit from "@/components/home/table/TheTableLineEdit.vue";
-import TheLabelHome from "@/components/home/TheLabelHome.vue";
+import TheLabelLoadingDate from "@/components/home/TheLabelLoadingDate.vue";
 import { useRequests } from "@/stores/requests";
 import { useAuthStore } from "@/stores/auth";
 import { ADD, EDIT, bDLists, TABLES_USERS_BD } from "@/constants";
+import {  editLine, requestEdit} from '@/tableFunction'
+
 
 
 const storeRequests = useRequests();
 const authStore = useAuthStore();
+
+const active_status = ref()
+
+onMounted(async () => {
+  isLoading.value = true
+  active_status.value = await authStore.getProperty('active_status')
+  isLoading.value = false
+} )
+
 
 // запускаю анимацию загрузки
 const isLoading = ref(false);
@@ -94,16 +112,16 @@ const colsLineName = ref([]);
 // ключ/значения перевода каждого столбца таблицы
 const colsNamesTranslation = ref();
 
-const tableData = ({ colsName, tablesData, nameBD, nameTableBD }) => {
+const tableData = ({ colsNameAndDate, tablesData, nameBD, nameTableBD }) => {
   namesBD.value = nameBD;
   namesTableBD.value = nameTableBD;
 
   generationLineFilters.value.length = 0;
   updateCollapsible.value++;
 
-  colsNamesTranslation.value = colsName;
+  colsNamesTranslation.value = colsNameAndDate;
 
-  // получаю имена столбцов без столбца id
+
   if (colsNamesTranslation.value) {
     generationLineFilters.value = colsNamesTranslation.value.map((c) => {
       return {
@@ -142,6 +160,15 @@ const sortsTable = (sort) => {
       };
     })
     .filter(Boolean);
+    
+
+
+    colsLineName.value = colsLineName.value.sort((a, b) => {
+    const countA = sort.find(item => item.nameFilter === a.key_Cols).count;
+    const countB = sort.find(item => item.nameFilter === b.key_Cols).count;
+    return countA - countB;
+});
+
   isLoading.value = false;
   tableFocus("#sendRef");
 };
@@ -155,20 +182,12 @@ const forbidden = () => {
 const editLineDate = ref();
 
 const editLineID = (id) => {
-  // Фильтрация данных по id
-  const filteredData = dataTable.value.filter((line) => line.id === id);
-
-  // Создание нового массива editLineDate.value
-  editLineDate.value = [];
-  for (const [key, value] of Object.entries(filteredData[0])) {
-    const uaName = colsLineName.value.find((n) => n.key_Cols === key);
-    editLineDate.value.push({
-      val: value,
-      name_ua_cols: uaName?.name_ua_cols || key,
-      key_Cols: key,
-    });
-  }
-
+    // Создание нового массива editLineDate.value
+  editLineDate.value = editLine({
+    id, 
+    dataTable:dataTable.value, 
+    colsLineName:colsLineName.value
+  })
   nameBTN.value = EDIT; // Assuming 'EDIT' is a string constant
 };
 
@@ -189,11 +208,7 @@ const isUpdateTable = async (edit) => {
 
   // отправить в SQL правку. после правлю текущие массивы
   try {
-    const result = await storeRequests.requestEditTable({
-      nameTableBD: namesTableBD.value,
-      date: nameBTN.value === EDIT ? newEdit : [newEdit],
-      type: nameBTN.value === EDIT ? "edit" : "add",
-    });
+    const result = requestEdit({edit, nameTableBD:namesTableBD.value, EDIT, nameBTN:nameBTN.value})
 
     if (result && nameBTN.value === EDIT) {
       updateLine(newEdit);
@@ -314,26 +329,28 @@ const addCol = async (val) => {
           key_Cols: keysString
         })
 
+        colsNamesTranslation.value = [...colsNamesTranslation.value, {
+          key_Cols: keysString,
+          name_ua_cols: valuesString,
+        }]
 
-        // Обновление данных в таблице и сортировочных данных
-        dataTable.value = sortAndFilter({
-          sort: sortsSave.value,
-          dataTable: dataTable.value,
-          keyCols: generationLineFilters.value,
-        });
+
         dataTable.value = dataTable.value.map((l) => ({
           ...l,
           [keysString]: "",
         }));
+
         sortsDataTable.value = sortAndFilter({
           sort: sortsSave.value,
-          dataTable: sortsDataTable.value,
+          dataTable: dataTable.value,
           keyCols: generationLineFilters.value,
         });
+
         sortsDataTable.value = sortsDataTable.value.map((l) => ({
           ...l,
           [keysString]: "",
         }));
+
       }
     } catch (error) {
       console.error("Ошибка:", error);
@@ -379,18 +396,13 @@ const delColumn = async (val) => {
       sortsSave.value = sortsSave.value.filter(k => k.nameFilter !== val)
 
       // Обновление данных в таблице и сортировочных данных
-      dataTable.value = sortAndFilter({
-          sort: sortsSave.value,
-          dataTable: dataTable.value,
-          keyCols: colsNamesTranslation.value,
-        });
 
         sortsDataTable.value = sortAndFilter({
           sort: sortsSave.value,
           dataTable: sortsDataTable.value,
           keyCols: colsNamesTranslation.value,
         });
-
+        
 
         // удаляю этот столбец с массивов таблицы
       dataTable.value = excludeKeyFromArray(dataTable.value, val);

@@ -54,7 +54,7 @@ const ollListsUsers = ref();
 const usersLogin = ref();
 
 const isLists = computed(() => requests.isUsersList);
-const storeAuth = computed ( () => useAuthStore()) 
+const storeAuth = useAuthStore()
 
 onMounted(async () => {
   useAccessPage('users')
@@ -69,7 +69,7 @@ onMounted(async () => {
   usersGroups.value = await requests.requestTableData(TABLES_USERS_BD.groups);
 
   // проверка на root и убираю с прав рута
-  const idUser = storeAuth.value.getProperty("group_id");
+  const idUser = storeAuth.getProperty("group_id");
   groupsVariable.value = usersGroups.value.map((g) => g.group_name);
   if(Number(idUser) !== 1) {
     groupsVariable.value = groupsVariable.value.filter(g => g!== 'root')
@@ -156,9 +156,9 @@ const tablesId = (val) => {
 };
 
 async function refreshDate(saveID) {
-  const idUser = storeAuth.value.getProperty("id");
+  const idUser = storeAuth.getProperty("id");
   if (String(idUser) === String(saveID)) {
-    const user = storeAuth.value.getProperty("user");
+    const user = storeAuth.getProperty("user");
     await requests.requestUserDataFilter({
       filterValue: user,
     });

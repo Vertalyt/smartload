@@ -4,7 +4,7 @@
   v-if="isAccess('allowed_group_editor')"
   class="flex items-center justify-center relative">
 
-    <button
+    <!-- <button
         class="rounded-full bg-gray-500 p-1 mr-2 hover:bg-gray-400"
         @click="isState('isEdit')"
       >
@@ -19,8 +19,6 @@
       class="w-5 h-5 text-gray-800"/>
     </button>
 
-
-
     <button
     v-if="isAccess('allowed_group')"
       class="rounded-full bg-red-700 ml-4 p-1 mr-2 hover:bg-red-800"
@@ -30,7 +28,63 @@
     </button>
 
     <TheAddCol @column="$emit('column', $event)"
-      />
+      /> -->
+
+      <TheTooltip 
+    content="Редагувати"
+    :isSHow="isSHowEdit"
+    >
+      <button
+        class="rounded-full bg-gray-500 p-1 mr-2 hover:bg-gray-400"
+        @click="isState('isEdit')"
+        @mouseover="isSHowEdit = true"
+        @mouseleave="isSHowEdit = false"
+      >
+      <PensilSVG  class="w-5 h-5 text-gray-800"/>
+    </button>
+    </TheTooltip>
+
+
+    <TheTooltip 
+    content="Видалити"
+    :isSHow="isSHowDel"
+    >
+
+    <button
+    class="rounded-full bg-red-700 p-1 mr-2 hover:bg-red-800"
+    @click="isState('isDel')"
+    @mouseover="isSHowDel = true"
+    @mouseleave="isSHowDel = false"
+      >
+      <DelRecordSVG  
+      class="w-5 h-5 text-gray-800"/>
+    </button>
+
+  </TheTooltip>
+
+
+
+  <TheTooltip 
+    content="Видалити стовбець"
+    :isSHow="isSHowColumnDel"
+    >
+    <button
+    v-if="isAccess('allowed_group')"
+      class="rounded-full bg-red-700 ml-4 p-1 mr-2 hover:bg-red-800"
+        @click="isState('isDelColumn')"
+        @mouseover="isSHowColumnDel = true"
+        @mouseleave="isSHowColumnDel = false"
+      >
+    <DelColumnSVG class="w-5 h-5" />
+    </button>
+  </TheTooltip>
+
+
+    <TheAddCol 
+    @column="$emit('column', $event, isSHowAddColumn = false)" 
+    @mouseover="isSHowAddColumn = true"
+    @mouseleave="isSHowAddColumn = false"
+         />
 
   </div>
 </template>
@@ -40,8 +94,12 @@
 import { ref, computed, watch } from 'vue'
 import PensilSVG from '@/assets/img/svg/PensilSVG.vue';
 import DelRecordSVG from '@/assets/img/svg/DelRecordSVG.vue';
-import TheAddCol from "./TheAddCol.vue";
 import DelColumnSVG from '@/assets/img/svg/DelColumnSVG.vue';
+
+
+import TheAddCol from "./TheAddCol.vue";
+import TheTooltip from '@/components/TheTooltip.vue'
+
 import { useAuthStore } from "@/stores/auth";
 import { allowed_group_editor, allowed_group } from '@/constants'
 
@@ -57,8 +115,8 @@ const props = defineProps({
   }
 })
 
-const storeAuth = computed ( () => useAuthStore()) 
-const groupUser = computed( () => storeAuth.value.getProperty('group_id') ) 
+const storeAuth = useAuthStore()
+const groupUser = computed( () => storeAuth.getProperty('group_id') ) 
 
 
 function isAccess(key) {
@@ -88,6 +146,11 @@ watch(computedReset, val => {
     stateTurn.value = 'empty'
   }
 })
+
+const isSHowEdit = ref(false)
+const isSHowDel = ref(false)
+const isSHowColumnDel = ref(false)
+const isSHowAddColumn = ref(false)
 
 </script>
 

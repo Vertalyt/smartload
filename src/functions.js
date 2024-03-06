@@ -28,15 +28,16 @@ function changeKeyValue(sort, keyCols) {
           nameFilter: find.key_Cols
         }
       } else {
-        return n
+        return  { 
+        n,
+        nameFilter: n.nameFilter
+        }
       }
     })
 }
 
 export function sortAndFilter({ sort, dataTable, keyCols }) {
-
   const newSort = changeKeyValue(sort, keyCols)
-
   // Применение фильтрации столбцов только из newSort
   const filteredData = dataTable.map((line) => {
     const filteredLine = Object.keys(line)
@@ -45,14 +46,14 @@ export function sortAndFilter({ sort, dataTable, keyCols }) {
         obj[key] = line[key];
         return obj;
       }, {});
+
     return filteredLine;
   });
-
   // Сортировка по значениям в поле count
   return sortAfterFiltering(newSort, filteredData);
 }
 
-function sortAfterFiltering(sort, filteredData) {
+export function sortAfterFiltering(sort, filteredData) {
   return filteredData.map((item) => {
     const sortedItem = sort
       .sort((a, b) => a.count - b.count)
@@ -363,3 +364,5 @@ export function excludeKeyFromArray(arr, key) {
     return obj
   });
 }
+
+

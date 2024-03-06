@@ -6,13 +6,13 @@ import { allowed_group } from "@/constants";
 
 export function useAccessPage(key) {
     const message = useMessage()
-    const storeAuth = computed ( () => useAuthStore()) 
-    const groupUser = computed( () => storeAuth.value.getProperty('group_id') ) 
-
+    const storeAuth = useAuthStore()
+    const groupUser = computed( () => storeAuth.getProperty('group_id') ) 
+    const active_status = computed( () => storeAuth.getProperty('active_status') ) 
     watch(groupUser, val => {
 
         if(val) {
-          if(!allowed_group[key].includes(Number(val))){
+          if(!allowed_group[key].includes(Number(val)) || Number(active_status.value) === 0){
           router.push('./')
           message.setMessage({
             type : 'warning',

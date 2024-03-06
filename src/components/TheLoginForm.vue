@@ -21,6 +21,7 @@
             @blur="nBlur"
             type="text"
             id="name"
+            autocomplete="username"
             name="name"
             required
             class="w-full rounded-md border-gray-300 pl-10 text-sm focus:border-green-500 focus:ring-green-500"
@@ -54,6 +55,7 @@
             v-model="password"
             @blur="pBlur"
             type="password"
+            autocomplete="current-password"
             id="password"
             name="password"
             class="w-full rounded-md border-gray-300 pl-10 text-sm focus:border-green-500 focus:ring-green-500"
@@ -82,11 +84,11 @@ import SubmitButton from "@/components/SubmitButton.vue";
 import { useField, useForm } from "vee-validate";
 import * as yup from "yup";
 import { useAuthStore } from "@/stores/auth.js";
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import TheLoader from "@/components/TheLoader.vue";
 
-const authStore = computed(() => useAuthStore());
+const authStore = useAuthStore();
 
 const isLoading = ref(false)
 const PASSWORD_LENGHT = 6;
@@ -118,7 +120,7 @@ const {
 
 const onSubmit = handleSubmit(async (values, { resetForm }) => {
   isLoading.value = true
-   const status = await authStore.value.login(values)
+   const status = await authStore.login(values)
    resetForm();
    if(status) {
     router.push('./')

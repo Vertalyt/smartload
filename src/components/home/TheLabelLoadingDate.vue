@@ -18,11 +18,13 @@ import TheDownloadBD from '@/components/home/TheDownloadBD.vue'
 
 defineEmits(['tableData', 'loading', 'forbidden']);
 
+
+
 </script>
 
 <script>
 export default {
-  name: 'TheLabelHome',
+  name: 'TheLabelLoadingDate',
 }
 </script>
 

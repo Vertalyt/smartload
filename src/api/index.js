@@ -73,7 +73,6 @@ export async function editTable({ nameTableBD, date, type, searchUsername }) {
      add : import.meta.env.VITE_URL_Tables_ADD_Record,
     };
   const url = urlVariable[type]
-
   try {
     const result = await instance.post(url, { nameTableBD, date, searchUsername }, {
       headers: {

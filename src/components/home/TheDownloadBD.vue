@@ -54,6 +54,7 @@ const addBD = async (val) => {
   const date = table_access.value.filter(b => b.bd_name === val);
   listsNameBD.value = date.map(item => item.table_name);
   } else {
+    console.log('(table_access.value с загрузки данных', table_access.value);
     listsNameBD.value = ['Звернітся до адміністратора']
   }
   choiceTable.value = 'Виберіть таблицю'
@@ -82,7 +83,7 @@ const adTable = async (val) => {
       if(tablesData.error) {
         console.log(tablesData.error);
       } else {
-        emit('tableData', {colsName:tablesColsName, tablesData, nameBD: choiceBD.value, nameTableBD: val})
+        emit('tableData', {colsNameAndDate:tablesColsName, tablesData, nameBD: choiceBD.value, nameTableBD: val})
       }
 
     }

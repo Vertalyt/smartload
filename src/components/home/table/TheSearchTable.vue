@@ -22,7 +22,7 @@ const props = defineProps({
   reset: {
     required: true,
     type: Boolean,
-  }
+  },
 });
 
 const modalSearch = ref()
@@ -30,7 +30,7 @@ const modalSearch = ref()
 // сброс фильтра
 const isReset = computed( () => props.reset )
 watch(isReset, val => {
-  if(val) {
+  if(val === true) {
     modalSearch.value = null
   }
 })

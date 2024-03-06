@@ -14,10 +14,11 @@ const layout = {
 const route = useRoute()
 const router = useRouter()
 const metaLayout = computed(() => route.meta.layout)
-const authStore = computed(() => useAuthStore() )
+const authStore = useAuthStore()
+
 
 onMounted( async() => {
-      const isAuth = await authStore.value.authenticateUser();
+      const isAuth = await authStore.authenticateUser();
         if(!isAuth) {
           router.push('/auth?message=auth_store')
         }
